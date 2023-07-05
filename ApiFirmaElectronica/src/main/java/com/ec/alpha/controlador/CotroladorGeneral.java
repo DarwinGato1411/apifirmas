@@ -89,7 +89,7 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial()); // Nombre de la empresa o puede ir vacio para persona natural
+			dn.setOrganization(solicitud.getSolRazonSocial()!=null?solicitud.getSolRazonSocial():"ALpha"); // Nombre de la empresa o puede ir vacio para persona natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensions ce = new CustomExtensions();
