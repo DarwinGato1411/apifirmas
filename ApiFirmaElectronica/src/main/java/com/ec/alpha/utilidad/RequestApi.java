@@ -6,6 +6,7 @@ public class RequestApi {
 	private Integer idSolicitud;
 	private Integer idUsuario;
 
+
 	public RequestApi() {
 		super();
 	}

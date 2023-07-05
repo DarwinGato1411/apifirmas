@@ -65,8 +65,8 @@ public class CotroladorGeneral {
 	private String urlconsulta;
 
 	@RequestMapping(value = "/procesar-firma-empresa", method = RequestMethod.POST)
-	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12")
-	public ResponseEntity<?> descuento(@RequestBody RequestApi valor) {
+	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12 Empresa")
+	public ResponseEntity<?> firmaEmpresa(@RequestBody RequestApi valor) {
 
 		try {
 
@@ -151,6 +151,21 @@ public class CotroladorGeneral {
 					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 
+	}
+	
+	@RequestMapping(value = "/procesar-persona-juridica", method = RequestMethod.POST)
+	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12 Persona Juridica")
+	public ResponseEntity<?> personaJuridica(@RequestBody RequestApi valor) {
+		
+		return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),""), HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping(value = "/procesar-persona-natural", method = RequestMethod.POST)
+	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12 Persona Natural")
+	public ResponseEntity<?> personaNatural(@RequestBody RequestApi valor) {
+		
+		return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),""), HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
