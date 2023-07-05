@@ -89,11 +89,11 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization("Alpha Technologies"); // Nombre de la empresa o puede ir vacio para persona natural
-			dn.setSerial_number("0001"); // Cedula
+			dn.setOrganization(solicitud.getSolRazonSocial()); // Nombre de la empresa o puede ir vacio para persona natural
+			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensions ce = new CustomExtensions();
-			ce.set_136141561051("www.alphaside.com/politicas.pfx"); // url de politicas
+			ce.set_136141561051("www.alphaside.com"); // url de politicas
 			ce.set_1361415610521("darwin@hotmail.com"); // correo
 			ce.set_1361415610523("Certificado de Miembro de Empresa"); // texto quemado
 			ce.set_1361415610531("1720489879");// cedula del cliente
@@ -142,7 +142,7 @@ public class CotroladorGeneral {
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
 			repository.save(solicitud);
-			return new ResponseEntity<>(certificate, HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),JSON), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
