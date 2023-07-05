@@ -25,7 +25,6 @@ import javax.persistence.Table;
  * @author Darwin
  */
 @Entity
-@Table(name = "ciudad")
 
 public class Ciudad implements Serializable {
 

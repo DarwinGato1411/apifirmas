@@ -1,7 +1,6 @@
 package com.ec.alpha.requestfirma;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CustomExtensions {
 	@JsonProperty("1.3.6.1.4.1.56105.1")
 	public String _136141561051;
@@ -9,6 +8,7 @@ public class CustomExtensions {
 	public String _1361415610521;
 	@JsonProperty("1.3.6.1.4.1.56105.2.3")
 	public String _1361415610523;
+	
 	@JsonProperty("1.3.6.1.4.1.56105.3.1")
 	public String _1361415610531;
 	@JsonProperty("1.3.6.1.4.1.56105.3.2")
@@ -29,8 +29,15 @@ public class CustomExtensions {
 	public String _1361415610539;
 	@JsonProperty("1.3.6.1.4.1.56105.3.10")
 	public String _13614156105310;
+	@JsonProperty("1.3.6.1.4.1.56105.3.11")
+	public String _13614156105311;
+	@JsonProperty("1.3.6.1.4.1.56105.3.12")
+	public String _13614156105312;
+	@JsonProperty("1.3.6.1.4.1.56105.3.13")
+	public String _13614156105313;
 	@JsonProperty("1.3.6.1.4.1.56105.3.18")
 	public String _13614156105318;
+	
 	public String get_136141561051() {
 		return _136141561051;
 	}
@@ -114,6 +121,25 @@ public class CustomExtensions {
 	}
 	public void set_13614156105318(String _13614156105318) {
 		this._13614156105318 = _13614156105318;
+	}
+
+	public String get_13614156105311() {
+		return _13614156105311;
+	}
+	public void set_13614156105311(String _13614156105311) {
+		this._13614156105311 = _13614156105311;
+	}
+	public String get_13614156105312() {
+		return _13614156105312;
+	}
+	public void set_13614156105312(String _13614156105312) {
+		this._13614156105312 = _13614156105312;
+	}
+	public String get_13614156105313() {
+		return _13614156105313;
+	}
+	public void set_13614156105313(String _13614156105313) {
+		this._13614156105313 = _13614156105313;
 	}
 	
 	

@@ -1,5 +1,7 @@
 package com.ec.alpha.utilidad;
 
+import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
+
 public class RequestApi {
 	private Integer idSolicitud;
 	private Integer idUsuario;

@@ -23,8 +23,6 @@ import javax.persistence.Table;
  * @author Darwin
  */
 @Entity
-@Table(name = "estado_firma")
-
 public class EstadoFirma implements Serializable {
 
     private static final long serialVersionUID = 1L;

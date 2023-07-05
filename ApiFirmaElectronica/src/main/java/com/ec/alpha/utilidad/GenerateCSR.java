@@ -84,7 +84,7 @@ public class GenerateCSR {
      */
     private static byte[] generatePKCS10(String CN, String OU, String O, String L, String S, String C) throws Exception {
         // generate PKCS10 certificate request
-        String sigAlg = "MD5WithRSA";
+        String sigAlg = "SHA256withRSA";
         PKCS10 pkcs10 = new PKCS10(publicKey);
         Signature signature = Signature.getInstance(sigAlg);
         signature.initSign(privateKey);

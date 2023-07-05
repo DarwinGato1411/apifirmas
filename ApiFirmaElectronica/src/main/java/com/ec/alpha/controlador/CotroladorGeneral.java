@@ -4,6 +4,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.net.ssl.SSLContext;
 
@@ -30,11 +33,15 @@ import com.ec.alpha.requestfirma.CustomExtensions;
 import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
 import com.ec.alpha.requestfirma.SubjectDn;
 import com.ec.alpha.requestfirma.Validity;
+import com.ec.alpha.responsefirma.CertificateObtenido;
 import com.ec.alpha.responsefirma.TokenFirma;
+import com.ec.alpha.utilidad.CsrValidity;
 import com.ec.alpha.utilidad.GeneradorCertificados;
 import com.ec.alpha.utilidad.GenerateCSR;
 import com.ec.alpha.utilidad.RequestApi;
 import com.ec.alpha.utilidad.RespuestaProceso;
+import com.ec.alpha.validationpolicy.Validationpolicy;
+import com.google.gson.Gson;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -46,38 +53,47 @@ public class CotroladorGeneral {
 
 	private ConsumirApiFirma consumirApiFirma;
 
-    @Autowired
-    public CotroladorGeneral(ConsumirApiFirma sslService) {
+	@Autowired
+	public CotroladorGeneral(ConsumirApiFirma sslService) {
 
-        this.consumirApiFirma = sslService;
-    }
+		this.consumirApiFirma = sslService;
+	}
 
-
-	
 	@Autowired
 	SolicitudRepository repository;
 	@Value("${url.api.firma}")
 	private String urlconsulta;
 
 	@RequestMapping(value = "/procesar-firma-empresa", method = RequestMethod.POST)
-	@ApiOperation(tags = "Firma electronica", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12")
+	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12")
 	public ResponseEntity<?> descuento(@RequestBody RequestApi valor) {
 
 		try {
 
+			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
+
+			
+			Date fechaActual = new Date();
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
+			calendar.add(Calendar.YEAR, 1); // numero de horas a añadir, o restar en caso de horas<0
+
+			long before = Instant.now().getEpochSecond();
+			long after = calendar.getTime().toInstant().getEpochSecond();
+
 			RequestMiembroEmpresa empresa = new RequestMiembroEmpresa();
 			Validity validity = new Validity();
-			validity.setNot_after(1686247857); // fecha actual en milisegundos
-			validity.setNot_before(1701872053);// cantidad de años
+			validity.setNot_after(after); // fecha actual en milisegundos
+			validity.setNot_before(before);// cantidad de años
 
 			SubjectDn dn = new SubjectDn();
-			dn.setCommon_name("steven.chiriboga@alphaside.com"); // correo del cliente
+			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
 			dn.setOrganization("Alpha Technologies"); // Nombre de la empresa o puede ir vacio para persona natural
 			dn.setSerial_number("0001"); // Cedula
 
 			CustomExtensions ce = new CustomExtensions();
-			ce.set_136141561051("www.defact.com"); // url de politicas
+			ce.set_136141561051("www.alphaside.com/politicas.pfx"); // url de politicas
 			ce.set_1361415610521("darwin@hotmail.com"); // correo
 			ce.set_1361415610523("Certificado de Miembro de Empresa"); // texto quemado
 			ce.set_1361415610531("1720489879");// cedula del cliente
@@ -90,26 +106,44 @@ public class CotroladorGeneral {
 			ce.set_1361415610538("09980409085");// Celular del cliente
 			ce.set_1361415610539("Quito");// Ciudad de cliente
 			ce.set_13614156105310("Ecuador");// Pais de emision
+			ce.set_13614156105311("Alpha Technologies");// Nombre de la empresa
+			ce.set_13614156105312("Gerente");// Cargo
+			ce.set_13614156105313("1720489879001");// RUC
 			ce.set_13614156105318("PFX");// texto quemado
+
 //se genera  a la base de datos por parte de alpha
-			
-			/*LLAMADA AL */
-			empresa.setPublic_key(
-					"\"-----BEGIN CERTIFICATE REQUEST-----\\nMIICvzCCAacCAQAwejELMAkGA1UEBhMCRUMxEjAQBgNVBAgMCVBpY2hpbmNoYTEO\\nMAwGA1UEBwwFUXVpdG8xHDAaBgNVBAoME0RlZmF1bHQgQ29tcGFueSBMdGQxKTAn\\nBgNVBAMMIHN0ZXZlbi5jaGlyaWJvZ2FAYcODbHBoYXNpZGUuY29tMIIBIjANBgkq\\nhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzE69YpWtsb3VIe/iveimNfayVFanR93V\\nhLAWYBEHusV1QlJAGJSq2VjWC039IeTVgpdb3I+Pj74hSBiJxHt1md3+/YMuSwGZ\\nx9IW51EsUyYzH9k73JAidbvhLBuBzxNAMUTkfQDjxCMX23pZAW4PjFWdkfMdzcNn\\nMSwJdJc8Zg1ak1lv93S5qotVSS/69JzWPCpUoCuzCgCp6HT0eruQw55DKr9U3rFw\\ntrpIAWAJOTd2NMVdKDVG6rmCBCiaTUscTYwPKm+DYKKIGCMF4Wh+BU0knc/jO42y\\nbhOXaxouPiyOTn0b4TUXllrybwqWHRdpzxWM1L9siRFH7WoDCBQC0wIDAQABoAAw\\nDQYJKoZIhvcNAQELBQADggEBAFSlD/29s7Pbh5L1h0UYDpms1OgZwEKujFP+HDDY\\nE1nacNH5GMBR7UqakGXDQwVegH2cG7G+LWaa1pFzjNeloDeMqgiP9QemqGwFyl2t\\ndvPRMbBfBNh2B2xAzOGEr+Q0+Ld9P5xvQDHpLvcGEYE28s1QeWq77uhqDAGW1tfN\\nH/3B/pnTWmnR7MITjas0M2j003GVeYa81OB2rEQ+3+cUmPHbOlo6Q9ecXHSgAiv4\\n7HQ7w8hr6sTjZSreKPet9T3ksRtIrgiio5yq+qWDGH6DkFEbY9gWG5R5HEEU7iEE\\n+23/2Jt60Pj0nNn+WTQ0jodw5wvcF0HLrFFSU58trbVobk0=\\n-----END CERTIFICATE REQUEST-----\"");
+			GenerateCSR gcsr = GenerateCSR.getInstance();
+
+			// System.out.println(gcsr.getCSR()); // CSR sin nada de info
+			// System.out.println(gcsr.getCSR("Pablo")); //CSR solo con el CN
+//			System.out.println(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC").replaceAll("\\r", "")); // CSR
+			// con
+
+			/* LLAMADA AL */
+			empresa.setPublic_key(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
+					.replaceAll("\\r", ""));
 
 			empresa.setCustom_extensions(ce);
 			empresa.setSubject_dn(dn);
 			empresa.setValidity(validity);
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
+			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
+			CredencialesToken param = new CredencialesToken();
+			param.setApi_key("014b7c08cdf45861");
+			param.setApi_secret("595797bc67224af967ac6a35036ab6ae398a7cac");
+			// Obtiene el token
+			TokenFirma token = consumirApiFirma.obtenerToken(param);
 
-			if (solicitud != null) {
+			CertificateObtenido certificate = consumirApiFirma.certificate(empresa, token.getAccess_token());
+			solicitud.setCertificate(certificate.getCertificate());
 
-				return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),
-						"Firma generada para la solicitud " + solicitud.getSolRuc()), HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>(new RespuestaProceso("200", "No encontro la solicitud"), HttpStatus.OK);
-			}
+			Gson gson = new Gson();
+			String JSON = gson.toJson(certificate);
+			System.out.println("JSON ENVIO " + JSON);
+			solicitud.setCertificateJson(JSON);
+			repository.save(solicitud);
+			return new ResponseEntity<>(certificate, HttpStatus.OK);
+//			
 
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -119,54 +153,180 @@ public class CotroladorGeneral {
 
 	}
 
-	@RequestMapping(value = "/generar-csr", method = RequestMethod.GET)
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	@ApiOperation(tags = "Global Sing", value = "Generar token")
+	public ResponseEntity<?> loginAPi() throws Exception {
+//		System.setProperty("com.ibm.jsse2.overrideDefaultTLS","true");
+
+//		ConsumirApiFirma apiFirma= new ConsumirApiFirma();
+		CredencialesToken param = new CredencialesToken();
+		param.setApi_key("689652829f001d7d");
+		param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+		TokenFirma token = consumirApiFirma.obtenerToken(param);
+		return new ResponseEntity<TokenFirma>(token, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/validationpolicy", method = RequestMethod.GET)
+	@ApiOperation(tags = "Global", value = "Validationpolicy ")
+	public ResponseEntity<?> validationpolicy() throws Exception {
+
+		CredencialesToken param = new CredencialesToken();
+		param.setApi_key("689652829f001d7d");
+		param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+		TokenFirma token = consumirApiFirma.obtenerToken(param);
+
+		Validationpolicy valorRet = consumirApiFirma.validationpolicy(token.getAccess_token());
+
+		return new ResponseEntity<Validationpolicy>(valorRet, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/claims/domains", method = RequestMethod.GET)
+	@ApiOperation(tags = "Global Sing", value = "Validationpolicy ")
+	public ResponseEntity<?> claimsDomains() throws Exception {
+
+		CredencialesToken param = new CredencialesToken();
+		param.setApi_key("689652829f001d7d");
+		param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+		TokenFirma token = consumirApiFirma.obtenerToken(param);
+
+		String valorRet = consumirApiFirma.claimsDomains(token.getAccess_token());
+
+		return new ResponseEntity<String>(valorRet, HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/empresa", method = RequestMethod.GET)
+	@ApiOperation(tags = "Modelo", value = "Generar certificado")
+	public ResponseEntity<?> empresa() throws Exception {
+
+		try {
+
+			Date fechaActual = new Date();
+			Calendar calendar = Calendar.getInstance();
+
+			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
+
+			calendar.add(Calendar.YEAR, 1); // numero de horas a añadir, o restar en caso de horas<0
+
+//			       calendar.getTime();
+			long before = Instant.now().getEpochSecond();
+			long after = calendar.getTime().toInstant().getEpochSecond();
+
+			RequestMiembroEmpresa empresa = new RequestMiembroEmpresa();
+			Validity validity = new Validity();
+			validity.setNot_after(after); // fecha actual en milisegundos
+			validity.setNot_before(before);// cantidad de años
+
+			SubjectDn dn = new SubjectDn();
+			dn.setCommon_name("steven.chiriboga@alphaside.com"); // correo del cliente
+			dn.setCountry("EC"); // Pais
+			dn.setOrganization("Alpha Technologies"); // Nombre de la empresa o puede ir vacio para persona natural
+			dn.setSerial_number("0001"); // Cedula
+
+			CustomExtensions ce = new CustomExtensions();
+			ce.set_136141561051("www.alphaside.com/politicas.pfx"); // url de politicas
+			ce.set_1361415610521("darwin@hotmail.com"); // correo
+			ce.set_1361415610523("Certificado de Miembro de Empresa"); // texto quemado
+			ce.set_1361415610531("1720489879");// cedula del cliente
+			ce.set_1361415610532("Steven Daniel");// Nombre del cliente
+			ce.set_1361415610533("Chiriboga");// Apellido del cliente
+			ce.set_1361415610534("Torres");// Segundo apellido
+			ce.set_1361415610535("Reservado");// texto quemado
+			ce.set_1361415610536("Reservado");// texto quemado
+			ce.set_1361415610537("De los cedros y pedro botto");// Direccion del cliente
+			ce.set_1361415610538("09980409085");// Celular del cliente
+			ce.set_1361415610539("Quito");// Ciudad de cliente
+			ce.set_13614156105310("Ecuador");// Pais de emision
+			ce.set_13614156105311("Alpha Technologies");// Nombre de la empresa
+			ce.set_13614156105312("Gerente");// Cargo
+			ce.set_13614156105313("1720489879001");// RUC
+			ce.set_13614156105318("PFX");// texto quemado
+
+//se genera  a la base de datos por parte de alpha
+			GenerateCSR gcsr = GenerateCSR.getInstance();
+
+			// System.out.println(gcsr.getCSR()); // CSR sin nada de info
+			// System.out.println(gcsr.getCSR("Pablo")); //CSR solo con el CN
+//			System.out.println(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC").replaceAll("\\r", "")); // CSR
+			// con
+
+			/* LLAMADA AL */
+			empresa.setPublic_key(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
+					.replaceAll("\\r", ""));
+
+			empresa.setCustom_extensions(ce);
+			empresa.setSubject_dn(dn);
+			empresa.setValidity(validity);
+
+			Gson gson = new Gson();
+			String JSON = gson.toJson(empresa);
+			System.out.println("JSON ENVIO " + JSON);
+			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
+			CredencialesToken param = new CredencialesToken();
+			param.setApi_key("014b7c08cdf45861");
+			param.setApi_secret("595797bc67224af967ac6a35036ab6ae398a7cac");
+			// Obtiene el token
+			TokenFirma token = consumirApiFirma.obtenerToken(param);
+
+			return new ResponseEntity<>(empresa, HttpStatus.OK);
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			return new ResponseEntity<RespuestaProceso>(
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), e.getMessage()), HttpStatus.BAD_REQUEST);
+		}
+	}
+
+//	@RequestMapping(value = "/generar-llaves", method = RequestMethod.GET)
+//	@ApiOperation(tags = "Certificado", value = "Generar certificado")
+//	public ResponseEntity<?> generarLlaves() throws Exception {
+//		GeneradorCertificados.crearClave();
+//		return new ResponseEntity<String>("Correcto", HttpStatus.BAD_REQUEST);
+//	}
+//	@RequestMapping(value = "/generar-csr", method = RequestMethod.GET)
 	@ApiOperation(tags = "Certificado", value = "Generar certificado")
 	public ResponseEntity<?> productos() throws Exception {
 		String keyPublic = "";
 		try {
+			Date fechaActual = new Date();
+			Calendar calendar = Calendar.getInstance();
 
-		    GenerateCSR gcsr = GenerateCSR.getInstance();      
-	        
-	        //System.out.println(gcsr.getCSR()); // CSR sin nada de info
-	       // System.out.println(gcsr.getCSR("Pablo")); //CSR solo con el CN
-	        System.out.println(gcsr.getCSR("Pablo","Tecnologia","Alpha Technologies","Kennedy","Pichincha","EC")); //CSR con toda la data
-	        
-	        System.out.println(gcsr.getPEMPrivateKey());
-	    	return new ResponseEntity<String>(gcsr.getPEMPrivateKey(), HttpStatus.OK);
+			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
+
+			calendar.add(Calendar.YEAR, 1); // numero de horas a añadir, o restar en caso de horas<0
+
+//			       calendar.getTime();
+			long time = Instant.now().getEpochSecond();
+			long after = calendar.getTime().toInstant().getEpochSecond();
+			GenerateCSR gcsr = GenerateCSR.getInstance();
+
+			CsrValidity crsValidity = new CsrValidity();
+			crsValidity.setNot_after(after);
+
+			// System.out.println(gcsr.getCSR()); // CSR sin nada de info
+			// System.out.println(gcsr.getCSR("Pablo")); //CSR solo con el CN
+			System.out.println("CSR");
+			System.out.println(
+					gcsr.getCSR("pablo@gmail.com", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")); // CSR
+			// con
+			// toda
+			// la
+			// data
+
+			System.out.println("PRIVATE KEY");
+			System.out.println(gcsr.getPEMPrivateKey());
+
+			System.out.println("PUBLIC KEY");
+			System.out.println(gcsr.getPublicKey());
+			String CSR = gcsr.getCSR("", "", "", "", "", "EC").replaceAll("\\r", "");
+			crsValidity.setCsr(CSR);
+			crsValidity.setNot_before(time);
+			return new ResponseEntity<CsrValidity>(crsValidity, HttpStatus.OK);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
-			return new ResponseEntity<String>("ERROR AL GENERARA EL CERTIFICADO: "+e.getMessage(), HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("ERROR AL GENERARA EL CERTIFICADO: " + e.getMessage(),
+					HttpStatus.BAD_REQUEST);
 		}
 
-	
-
 	}
-	
-	
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	@ApiOperation(tags = "login", value = "Generar token")
-	public ResponseEntity<?> loginAPi() throws Exception {
-//		System.setProperty("com.ibm.jsse2.overrideDefaultTLS","true");
-		
-//		ConsumirApiFirma apiFirma= new ConsumirApiFirma();
-		CredencialesToken param= new CredencialesToken();
-		param.setApi_key("689652829f001d7d");
-		param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
-		TokenFirma token=consumirApiFirma.obtenerToken(param,urlconsulta+"login");
-		return new ResponseEntity<TokenFirma>(token, HttpStatus.OK);
-	}
-	
-	
-	
-	
-	@RequestMapping(value = "/generar-llaves", method = RequestMethod.GET)
-	@ApiOperation(tags = "Certificado", value = "Generar certificado")
-	public ResponseEntity<?> generarLlaves() throws Exception {
-		GeneradorCertificados.crearClave();
-		return new ResponseEntity<String>("Correcto", HttpStatus.BAD_REQUEST);
-	}
-	
-	
-	
 
 }

@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 package com.ec.alpha.entidad;
+
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -26,6 +27,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "solicitud")
+
 public class Solicitud implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -95,23 +97,91 @@ public class Solicitud implements Serializable {
     private String solJson;
     @Column(name = "sol_id_request")
     private String solIdRequest;
+
+    @Column(name = "sol_tipo")
+    private String solTipo;
+
+    @Column(name = "sol_ruc_empresa")
+    private String solRucEmpresa;
+
+    @Column(name = "sol_razon_social")
+    private String solRazonSocial;
+
+    @Column(name = "sol_area")
+    private String solArea;
+
+    @Column(name = "sol_cargo_representante")
+    private String solCargoRepresentante;
+
+    @Column(name = "sol_cargo_solicitante")
+    private String solCargoSolicitante;
+
+    @Column(name = "sol_me_tipodocumento")
+    private String solMeTipodocumento;
+
+    @Column(name = "sol_me_nombres")
+    private String solMeNombres;
+
+    @Column(name = "sol_me_apellido1")
+    private String solMeApellido1;
+
+    @Column(name = "sol_me_apellido2")
+    private String solMeApellido2;
+
+    @Column(name = "sol_me_ruc")
+    private String solMeRuc;
+
+    @Column(name = "sol_fecha_creacion")
+    private Date solFechaCreacion;
+    
+    @Column(name = "sol_path_constitucion_compania")
+    private String solPathConstitucionCompania;
+    
+    @Column(name = "sol_path_nombramiento_representante")
+    private String solPathNombramientoRepresentante;
+    
+    @Column(name = "sol_path_aceptacion_nombramiento")
+    private String solPathAceptacionNombramiento;
+    
+    @Column(name = "sol_path_ruc_empresa")
+    private String solPathRucEmpresa;
+    
+    @Column(name = "sol_path_cedula_representante_empresa")
+    private String solPathCedulaRepresentanteEmpresa;
+    
+    @Column(name = "sol_path_autorizacion_representante")
+    private String solPathAutorizacionRepresentante;
+    
+    @Column(name = "sol_num_retencion")
+    private String solNumRetencion;
+    
+    @Column(name = "certificate")
+    private String certificate; 
+    
+    
+    @Column(name = "certificate_json")
+    private String certificateJson;
+    
+    
     @JoinColumn(name = "id_ciudad", referencedColumnName = "id_ciudad")
     @ManyToOne
     private Ciudad idCiudad;
+    
     @JoinColumn(name = "id_estado_firma", referencedColumnName = "id_estado_firma")
     @ManyToOne
     private EstadoFirma idEstadoFirma;
+    
     @JoinColumn(name = "id_estado_proceso", referencedColumnName = "id_estado_proceso")
     @ManyToOne
     private EstadoProceso idEstadoProceso;
+    
     @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario")
     @ManyToOne
     private Usuario idUsuario;
-    
-    @JoinColumn(name = "id_tipo_firma", referencedColumnName = "id_tipo_firma")
+
+    @JoinColumn(name = "id_detalle_tipo_firma", referencedColumnName = "id_detalle_tipo_firma")
     @ManyToOne
-    private TipoFirma idTipoFirma;
-    
+    private DetalleTipoFirma idDetalleTipoFirma;
 
     public Solicitud() {
     }
@@ -400,15 +470,14 @@ public class Solicitud implements Serializable {
         this.solConRuc = solConRuc;
     }
 
-    public TipoFirma getIdTipoFirma() {
-        return idTipoFirma;
+    public DetalleTipoFirma getIdDetalleTipoFirma() {
+        return idDetalleTipoFirma;
     }
 
-    public void setIdTipoFirma(TipoFirma idTipoFirma) {
-        this.idTipoFirma = idTipoFirma;
+    public void setIdDetalleTipoFirma(DetalleTipoFirma idDetalleTipoFirma) {
+        this.idDetalleTipoFirma = idDetalleTipoFirma;
     }
-    
-    
+
 
     @Override
     public int hashCode() {
@@ -435,4 +504,173 @@ public class Solicitud implements Serializable {
         return "com.ec.entidad.Solicitud[ idSolicitud=" + idSolicitud + " ]";
     }
 
+    public String getSolTipo() {
+        return solTipo;
+    }
+
+    public void setSolTipo(String solTipo) {
+        this.solTipo = solTipo;
+    }
+
+    public String getSolRucEmpresa() {
+        return solRucEmpresa;
+    }
+
+    public void setSolRucEmpresa(String solRucEmpresa) {
+        this.solRucEmpresa = solRucEmpresa;
+    }
+
+    public String getSolRazonSocial() {
+        return solRazonSocial;
+    }
+
+    public void setSolRazonSocial(String solRazonSocial) {
+        this.solRazonSocial = solRazonSocial;
+    }
+
+    public String getSolArea() {
+        return solArea;
+    }
+
+    public void setSolArea(String solArea) {
+        this.solArea = solArea;
+    }
+
+    public String getSolCargoRepresentante() {
+        return solCargoRepresentante;
+    }
+
+    public void setSolCargoRepresentante(String solCargoRepresentante) {
+        this.solCargoRepresentante = solCargoRepresentante;
+    }
+
+    public String getSolCargoSolicitante() {
+        return solCargoSolicitante;
+    }
+
+    public void setSolCargoSolicitante(String solCargoSolicitante) {
+        this.solCargoSolicitante = solCargoSolicitante;
+    }
+
+    public String getSolMeTipodocumento() {
+        return solMeTipodocumento;
+    }
+
+    public void setSolMeTipodocumento(String solMeTipodocumento) {
+        this.solMeTipodocumento = solMeTipodocumento;
+    }
+
+    public String getSolMeNombres() {
+        return solMeNombres;
+    }
+
+    public void setSolMeNombres(String solMeNombres) {
+        this.solMeNombres = solMeNombres;
+    }
+
+    public String getSolMeApellido1() {
+        return solMeApellido1;
+    }
+
+    public void setSolMeApellido1(String solMeApellido1) {
+        this.solMeApellido1 = solMeApellido1;
+    }
+
+    public String getSolMeApellido2() {
+        return solMeApellido2;
+    }
+
+    public void setSolMeApellido2(String solMeApellido2) {
+        this.solMeApellido2 = solMeApellido2;
+    }
+
+    public String getSolMeRuc() {
+        return solMeRuc;
+    }
+
+    public void setSolMeRuc(String solMeRuc) {
+        this.solMeRuc = solMeRuc;
+    }
+
+    public Date getSolFechaCreacion() {
+        return solFechaCreacion;
+    }
+
+    public void setSolFechaCreacion(Date solFechaCreacion) {
+        this.solFechaCreacion = solFechaCreacion;
+    }
+
+    public String getSolPathConstitucionCompania() {
+        return solPathConstitucionCompania;
+    }
+
+    public void setSolPathConstitucionCompania(String solPathConstitucionCompania) {
+        this.solPathConstitucionCompania = solPathConstitucionCompania;
+    }
+
+    public String getSolPathNombramientoRepresentante() {
+        return solPathNombramientoRepresentante;
+    }
+
+    public void setSolPathNombramientoRepresentante(String solPathNombramientoRepresentante) {
+        this.solPathNombramientoRepresentante = solPathNombramientoRepresentante;
+    }
+
+    public String getSolPathAceptacionNombramiento() {
+        return solPathAceptacionNombramiento;
+    }
+
+    public void setSolPathAceptacionNombramiento(String solPathAceptacionNombramiento) {
+        this.solPathAceptacionNombramiento = solPathAceptacionNombramiento;
+    }
+
+    public String getSolPathRucEmpresa() {
+        return solPathRucEmpresa;
+    }
+
+    public void setSolPathRucEmpresa(String solPathRucEmpresa) {
+        this.solPathRucEmpresa = solPathRucEmpresa;
+    }
+
+    public String getSolPathCedulaRepresentanteEmpresa() {
+        return solPathCedulaRepresentanteEmpresa;
+    }
+
+    public void setSolPathCedulaRepresentanteEmpresa(String solPathCedulaRepresentanteEmpresa) {
+        this.solPathCedulaRepresentanteEmpresa = solPathCedulaRepresentanteEmpresa;
+    }
+
+    public String getSolPathAutorizacionRepresentante() {
+        return solPathAutorizacionRepresentante;
+    }
+
+    public void setSolPathAutorizacionRepresentante(String solPathAutorizacionRepresentante) {
+        this.solPathAutorizacionRepresentante = solPathAutorizacionRepresentante;
+    }
+
+    public String getSolNumRetencion() {
+        return solNumRetencion;
+    }
+
+    public void setSolNumRetencion(String solNumRetencion) {
+        this.solNumRetencion = solNumRetencion;
+    }
+
+	public String getCertificate() {
+		return certificate;
+	}
+
+	public void setCertificate(String certificate) {
+		this.certificate = certificate;
+	}
+
+	public String getCertificateJson() {
+		return certificateJson;
+	}
+
+	public void setCertificateJson(String certificateJson) {
+		this.certificateJson = certificateJson;
+	}
+
+    
 }
