@@ -17,9 +17,9 @@ import org.springframework.web.client.RestTemplate;
 public class RestTemplateConfig {	
 
 
-	@Value("${server.ssl.key-store}")
+	@Value("${trust.store}")
 	private Resource trustStore;
-	@Value("${server.ssl.key-store-password}")
+	@Value("${trust.store.password}")
 	private String trustStorePassword;
 	String protocol = "TLSv1.2";
 

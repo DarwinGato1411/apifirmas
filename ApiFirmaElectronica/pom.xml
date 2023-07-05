@@ -9,11 +9,11 @@
 		<version>2.5.1</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.ec.pintulac</groupId>
-	<artifactId>WsCategoria</artifactId>
+	<groupId>com.ec.alpha</groupId>
+	<artifactId>ApiFirmas</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Descuento</name>
-	<description>Web services pintulac</description>
+	<description>Web services firmas</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
