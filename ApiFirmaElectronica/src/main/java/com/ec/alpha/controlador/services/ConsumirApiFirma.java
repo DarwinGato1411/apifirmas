@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.ec.alpha.requestfirma.CredencialesToken;
+import com.ec.alpha.requestfirma.RequestJuridica;
 import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
+import com.ec.alpha.requestfirma.RequestPersonaNatural;
 import com.ec.alpha.responsefirma.CertificateObtenido;
 import com.ec.alpha.responsefirma.TokenFirma;
 import com.ec.alpha.validationpolicy.Validationpolicy;
@@ -52,8 +54,7 @@ public class ConsumirApiFirma {
 		}
 	}
 
-	/* CERTIFICATE */
-
+	/* CERTIFICATE EMPRESA */
 	public CertificateObtenido certificate(RequestMiembroEmpresa param, String token) {
 		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
 				HttpClientBuilder.create().build());
@@ -89,6 +90,80 @@ public class ConsumirApiFirma {
 		}
 	}
 
+	
+	/* CERTIFICATE JURIDICA */
+	public CertificateObtenido certificateJuridica(RequestJuridica param, String token) {
+		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+				HttpClientBuilder.create().build());
+//		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+		HttpHeaders headers = new HttpHeaders();
+//		ResponseEnvioCorreo respuesta = new ResponseEnvioCorreo();
+
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.set("Authorization", "Bearer " + token.replace("\"", ""));
+		try {
+			String urlPeticion = "";
+			urlPeticion = urlconsulta + "v2/certificates";
+			HttpEntity<RequestJuridica> requestBody = new HttpEntity<RequestJuridica>(param, headers);
+
+			System.out.println("URL  certificates" + urlPeticion);
+			// Send request with POST method.
+//			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
+			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody, String.class);
+			String resultString = response.getBody();
+			HttpHeaders headersRespo = response.getHeaders();
+			String valor=headersRespo.getFirst("Location");
+		
+			urlPeticion = urlconsulta + valor;
+			
+			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET, requestBody, CertificateObtenido.class,
+					1);
+			
+			CertificateObtenido certificate=responseCertificate.getBody();
+			return certificate;
+		} catch (Exception e) {
+			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
+			return null;
+		}
+	}
+	
+	
+	/* CERTIFICATE PERSONA NATURAL */
+	public CertificateObtenido certificatePersonaNatural(RequestPersonaNatural param, String token) {
+		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+				HttpClientBuilder.create().build());
+//		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+		HttpHeaders headers = new HttpHeaders();
+//		ResponseEnvioCorreo respuesta = new ResponseEnvioCorreo();
+
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.set("Authorization", "Bearer " + token.replace("\"", ""));
+		try {
+			String urlPeticion = "";
+			urlPeticion = urlconsulta + "v2/certificates";
+			HttpEntity<RequestPersonaNatural> requestBody = new HttpEntity<RequestPersonaNatural>(param, headers);
+
+			System.out.println("URL  certificates" + urlPeticion);
+			// Send request with POST method.
+//			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
+			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody, String.class);
+			String resultString = response.getBody();
+			HttpHeaders headersRespo = response.getHeaders();
+			String valor=headersRespo.getFirst("Location");
+		
+			urlPeticion = urlconsulta + valor;
+			
+			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET, requestBody, CertificateObtenido.class,
+					1);
+			
+			CertificateObtenido certificate=responseCertificate.getBody();
+			return certificate;
+		} catch (Exception e) {
+			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
+			return null;
+		}
+	}
+	
 	/* validationpolicy */
 	public Validationpolicy validationpolicy(String token) {
 		HttpHeaders headers = new HttpHeaders();
