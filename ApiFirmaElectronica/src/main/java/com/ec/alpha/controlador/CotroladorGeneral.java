@@ -76,7 +76,6 @@ public class CotroladorGeneral {
 
 			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
 
-			
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
@@ -93,11 +92,21 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial()!=null?solicitud.getSolRazonSocial():"Alpha"); // Nombre de la empresa o puede ir vacio para persona natural
+			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
+																													// de
+																													// la
+																													// empresa
+																													// o
+																													// puede
+																													// ir
+																													// vacio
+																													// para
+																													// persona
+																													// natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensions ce = new CustomExtensions();
-			ce.set_136141561051("www.alphaside.com"); // url de politicas
+			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610523("Certificado de Miembro de Empresa"); // texto quemado
 			ce.set_1361415610531(solicitud.getSolRuc());// cedula del cliente
@@ -113,7 +122,9 @@ public class CotroladorGeneral {
 			ce.set_13614156105311(solicitud.getSolRazonSocial());// Nombre de la empresa
 			ce.set_13614156105312(solicitud.getSolCargoSolicitante());// Cargo
 			ce.set_13614156105313(solicitud.getSolRucEmpresa());// RUC
-			ce.set_13614156105318("PFX");// texto quemado
+			ce.set_13614156105318(
+					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
+							: "TOKEN");// texto quemado
 
 //se genera  a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
@@ -146,7 +157,7 @@ public class CotroladorGeneral {
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),JSON), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
@@ -156,16 +167,15 @@ public class CotroladorGeneral {
 		}
 
 	}
-	
+
 	@RequestMapping(value = "/procesar-persona-juridica", method = RequestMethod.POST)
 	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12 Persona Juridica")
 	public ResponseEntity<?> personaJuridica(@RequestBody RequestApi valor) {
-		
+
 		try {
 
 			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
 
-			
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
@@ -182,11 +192,21 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial()!=null?solicitud.getSolRazonSocial():"Alpha"); // Nombre de la empresa o puede ir vacio para persona natural
+			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
+																													// de
+																													// la
+																													// empresa
+																													// o
+																													// puede
+																													// ir
+																													// vacio
+																													// para
+																													// persona
+																													// natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensionsJuridica ce = new CustomExtensionsJuridica();
-			ce.set_136141561051("www.alphaside.com"); // url de politicas
+			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610522("Certificado de Representante Legal"); // texto quemado
 			ce.set_1361415610531(solicitud.getSolRuc());// cedula del cliente
@@ -202,7 +222,9 @@ public class CotroladorGeneral {
 			ce.set_13614156105311(solicitud.getSolRazonSocial());// Nombre de la empresa
 			ce.set_13614156105312(solicitud.getSolCargoRepresentante());// Cargo
 			ce.set_13614156105313(solicitud.getSolRucEmpresa());// RUC
-			ce.set_13614156105318("PFX");// texto quemado
+			ce.set_13614156105318(
+					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
+							: "TOKEN");// texto quemado
 
 //se genera  a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
@@ -213,8 +235,9 @@ public class CotroladorGeneral {
 			// con
 
 			/* LLAMADA AL */
-			juridica.setPublic_key(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
-					.replaceAll("\\r", ""));
+			juridica.setPublic_key(
+					gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
+							.replaceAll("\\r", ""));
 
 			juridica.setCustom_extensions(ce);
 			juridica.setSubject_dn(dn);
@@ -235,7 +258,7 @@ public class CotroladorGeneral {
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),JSON), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
@@ -244,17 +267,15 @@ public class CotroladorGeneral {
 					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
-	
+
 	@RequestMapping(value = "/procesar-persona-natural", method = RequestMethod.POST)
 	@ApiOperation(tags = "Global Sing", value = "Obtiene el certificado para generar la firma electrónica como archivo .p12 Persona Natural")
 	public ResponseEntity<?> personaNatural(@RequestBody RequestApi valor) {
-		
+
 		try {
 
 			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
 
-			
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
@@ -273,12 +294,12 @@ public class CotroladorGeneral {
 			dn.setCountry("EC"); // Pais
 //			dn.setOrganization(solicitud.getSolRazonSocial()!=null?solicitud.getSolRazonSocial():"Alpha"); // Nombre de la empresa o puede ir vacio para persona natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
-
+			System.out.println("solicitud.getSolCedula() " + solicitud.getSolCedula());
 			CustomExtensionsPersona ce = new CustomExtensionsPersona();
-			ce.set_136141561051("www.alphaside.com"); // url de politicas
+			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610524("Certificado de Persona Natural"); // texto quemado
-			ce.set_1361415610531(solicitud.getSolConRuc()?solicitud.getSolRuc()+"001":solicitud.getSolRuc());// cedula del cliente
+			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
@@ -287,10 +308,14 @@ public class CotroladorGeneral {
 			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
 			ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
-			ce.set_13614156105310("Ecuador");// Pais de emision			
-			ce.set_13614156105318("PFX");// texto quemado
+			ce.set_13614156105310("Ecuador");// Pais de emision
+			ce.set_13614156105313(solicitud.getSolConRuc() ? solicitud.getSolRuc() : "");// RUC en el caso de persona
+																							// natural con ruc
+			ce.set_13614156105318(
+					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
+							: "TOKEN");// texto quemado
 
-//se genera  a la base de datos por parte de alpha
+			// se genera a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
 
 			// System.out.println(gcsr.getCSR()); // CSR sin nada de info
@@ -299,8 +324,9 @@ public class CotroladorGeneral {
 			// con
 
 			/* LLAMADA AL */
-			personaNatural.setPublic_key(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
-					.replaceAll("\\r", ""));
+			personaNatural.setPublic_key(
+					gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
+							.replaceAll("\\r", ""));
 
 			personaNatural.setCustom_extensions(ce);
 			personaNatural.setSubject_dn(dn);
@@ -313,7 +339,8 @@ public class CotroladorGeneral {
 			// Obtiene el token
 			TokenFirma token = consumirApiFirma.obtenerToken(param);
 
-			CertificateObtenido certificate = consumirApiFirma.certificatePersonaNatural(personaNatural, token.getAccess_token());
+			CertificateObtenido certificate = consumirApiFirma.certificatePersonaNatural(personaNatural,
+					token.getAccess_token());
 			solicitud.setCertificate(certificate.getCertificate());
 
 			Gson gson = new Gson();
@@ -321,7 +348,7 @@ public class CotroladorGeneral {
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(),JSON), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {

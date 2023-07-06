@@ -163,6 +163,9 @@ public class Solicitud implements Serializable {
     private String certificateJson;
     
     
+    @Column(name = "sol_cedula")
+    private String solCedula;
+    
     @JoinColumn(name = "id_ciudad", referencedColumnName = "id_ciudad")
     @ManyToOne
     private Ciudad idCiudad;
@@ -670,6 +673,14 @@ public class Solicitud implements Serializable {
 
 	public void setCertificateJson(String certificateJson) {
 		this.certificateJson = certificateJson;
+	}
+
+	public String getSolCedula() {
+		return solCedula;
+	}
+
+	public void setSolCedula(String solCedula) {
+		this.solCedula = solCedula;
 	}
 
     

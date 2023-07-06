@@ -29,6 +29,8 @@ public class CustomExtensionsPersona {
 	public String _1361415610539;
 	@JsonProperty("1.3.6.1.4.1.56105.3.10")
 	public String _13614156105310;
+	@JsonProperty("1.3.6.1.4.1.56105.3.13")
+	public String _13614156105313;
 	@JsonProperty("1.3.6.1.4.1.56105.3.18")
 	public String _13614156105318;
 	public String get_136141561051() {
@@ -116,6 +118,14 @@ public class CustomExtensionsPersona {
 	public void set_13614156105318(String _13614156105318) {
 		this._13614156105318 = _13614156105318;
 	}
+	public String get_13614156105313() {
+		return _13614156105313;
+	}
+	public void set_13614156105313(String _13614156105313) {
+		this._13614156105313 = _13614156105313;
+	}
+	
+	
 	
 	
 }
