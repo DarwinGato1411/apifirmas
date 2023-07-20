@@ -41,8 +41,10 @@ public class RestTemplateConfig {
 		try {
 			   sslContext = SSLContextBuilder
 		                .create()
-		                .loadKeyMaterial(ResourceUtils.getFile("classpath:alpha.p12"), trustStorePassword.toCharArray(), trustStorePassword.toCharArray())
-		                .loadTrustMaterial(ResourceUtils.getFile("classpath:alpha.jks"), trustStorePassword.toCharArray(), new TrustSelfSignedStrategy() {
+//		                .loadKeyMaterial(ResourceUtils.getFile("classpath:alpha.p12"), trustStorePassword.toCharArray(), trustStorePassword.toCharArray())
+//		                .loadTrustMaterial(ResourceUtils.getFile("classpath:alpha.jks"), trustStorePassword.toCharArray(), new TrustSelfSignedStrategy() {
+		                	 .loadKeyMaterial(ResourceUtils.getFile("/opt/alpha.p12"), trustStorePassword.toCharArray(), trustStorePassword.toCharArray())
+				                .loadTrustMaterial(ResourceUtils.getFile("/opt/alpha.jks"), trustStorePassword.toCharArray(), new TrustSelfSignedStrategy() {
 		                    @Override
 		                    public boolean isTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
 		                        return true;

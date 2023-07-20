@@ -165,6 +165,9 @@ public class Solicitud implements Serializable {
     
     @Column(name = "sol_cedula")
     private String solCedula;
+//    
+//    @Column(name = "sol_private_key")
+//    private String solPrivateKey;
     
     @JoinColumn(name = "id_ciudad", referencedColumnName = "id_ciudad")
     @ManyToOne
@@ -682,6 +685,14 @@ public class Solicitud implements Serializable {
 	public void setSolCedula(String solCedula) {
 		this.solCedula = solCedula;
 	}
+
+//	public String getSolPrivateKey() {
+//		return solPrivateKey;
+//	}
+//
+//	public void setSolPrivateKey(String solPrivateKey) {
+//		this.solPrivateKey = solPrivateKey;
+//	}
 
     
 }

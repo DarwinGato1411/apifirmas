@@ -48,6 +48,10 @@ public class Parametrizar implements Serializable {
     private Boolean parActivo;
     @Column(name = "par_host")
     private String parHost;
+//    @Column(name = "par_rootcrt")
+//    private String parRootCrt;
+//    @Column(name = "par_intermediatecrt")
+//    private String parIntermediateCrt;
 
     public Parametrizar() {
     }
@@ -135,8 +139,26 @@ public class Parametrizar implements Serializable {
     public void setParHost(String parHost) {
         this.parHost = parHost;
     }
+    
+    
 
-    @Override
+//    public String getParRootCrt() {
+//		return parRootCrt;
+//	}
+//
+//	public void setParRootCrt(String parRootCrt) {
+//		this.parRootCrt = parRootCrt;
+//	}
+//
+//	public String getParIntermediateCrt() {
+//		return parIntermediateCrt;
+//	}
+//
+//	public void setParIntermediateCrt(String parIntermediateCrt) {
+//		this.parIntermediateCrt = parIntermediateCrt;
+//	}
+
+	@Override
     public int hashCode() {
         int hash = 0;
         hash += (idParametrizar != null ? idParametrizar.hashCode() : 0);

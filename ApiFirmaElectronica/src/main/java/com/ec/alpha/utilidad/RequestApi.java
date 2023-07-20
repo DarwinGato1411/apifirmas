@@ -5,6 +5,7 @@ import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
 public class RequestApi {
 	private Integer idSolicitud;
 	private Integer idUsuario;
+	private String clave;
 
 
 	public RequestApi() {
@@ -31,6 +32,14 @@ public class RequestApi {
 
 	public void setIdUsuario(Integer idUsuario) {
 		this.idUsuario = idUsuario;
+	}
+
+	public String getClave() {
+		return clave;
+	}
+
+	public void setClave(String clave) {
+		this.clave = clave;
 	}
 
 }

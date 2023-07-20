@@ -120,7 +120,11 @@
 			<artifactId>bc-noncert</artifactId>
 			<version>1.0.2.4</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.alpha</groupId>
+			<artifactId>bcpkix</artifactId>
+			<version>1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
@@ -128,7 +132,7 @@
 			<type>jar</type>
 		</dependency>
 
-	
+
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>

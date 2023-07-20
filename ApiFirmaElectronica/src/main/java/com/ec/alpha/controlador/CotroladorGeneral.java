@@ -1,5 +1,6 @@
 package com.ec.alpha.controlador;
 
+import java.io.File;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.ec.alpha.controlador.services.ConsumirApiFirma;
+import com.ec.alpha.entidad.Parametrizar;
 import com.ec.alpha.entidad.Solicitud;
+import com.ec.alpha.repository.ParametrizarRepository;
 import com.ec.alpha.repository.SolicitudRepository;
 import com.ec.alpha.requestfirma.CredencialesToken;
 import com.ec.alpha.requestfirma.CustomExtensions;
@@ -42,8 +45,10 @@ import com.ec.alpha.responsefirma.TokenFirma;
 import com.ec.alpha.utilidad.CsrValidity;
 import com.ec.alpha.utilidad.GeneradorCertificados;
 import com.ec.alpha.utilidad.GenerateCSR;
+import com.ec.alpha.utilidad.Info;
 import com.ec.alpha.utilidad.RequestApi;
 import com.ec.alpha.utilidad.RespuestaProceso;
+import com.ec.alpha.utilidad.ToP12;
 import com.ec.alpha.validationpolicy.Validationpolicy;
 import com.google.gson.Gson;
 
@@ -56,6 +61,8 @@ import io.swagger.annotations.ApiOperation;
 public class CotroladorGeneral {
 
 	private ConsumirApiFirma consumirApiFirma;
+	@Autowired
+	private ParametrizarRepository parametrizarRepository;
 
 	@Autowired
 	public CotroladorGeneral(ConsumirApiFirma sslService) {
@@ -76,10 +83,22 @@ public class CotroladorGeneral {
 
 			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
 
+			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
-			calendar.add(Calendar.YEAR, 1); // numero de horas a añadir, o restar en caso de horas<0
+			calendar.add(Calendar.YEAR,
+					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
+																												// de
+																												// horas
+																												// a
+																												// añadir,
+																												// o
+																												// restar
+																												// en
+																												// caso
+																												// de
+																												// horas<0
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
@@ -109,7 +128,7 @@ public class CotroladorGeneral {
 			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610523("Certificado de Miembro de Empresa"); // texto quemado
-			ce.set_1361415610531(solicitud.getSolRuc());// cedula del cliente
+			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
@@ -121,7 +140,7 @@ public class CotroladorGeneral {
 			ce.set_13614156105310("Ecuador");// Pais de emision
 			ce.set_13614156105311(solicitud.getSolRazonSocial());// Nombre de la empresa
 			ce.set_13614156105312(solicitud.getSolCargoSolicitante());// Cargo
-			ce.set_13614156105313(solicitud.getSolRucEmpresa());// RUC
+			ce.set_13614156105313(solicitud.getSolRuc());// RUC
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
@@ -156,14 +175,35 @@ public class CotroladorGeneral {
 			String JSON = gson.toJson(certificate);
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
+//			solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
+
+			/* Generar firma .p12 */
+			Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
+			String rutaFirma = parametrizar.getParBase() + File.separator;
+			Date date = new Date();
+			long timeMilli = date.getTime();
+			 File baseDir = new File(rutaFirma);
+	            if (!baseDir.exists()) {
+	                baseDir.mkdirs();
+	            }
+
+			rutaFirma = rutaFirma +solicitud.getSolNombre() + "_" + solicitud.getSolApellido1()+"_"+ timeMilli + ".p12";
+
+			ToP12 t = new ToP12();
+			/* si los certificados se caducan se debe cambiar en la clase Info */
+			byte bytes[] = t.convertPEMToPKCS12FromString(gcsr.getPEMPrivateKey(), certificate.getCertificate(),
+					Info.rootCrt, Info.intermediateCrt, valor.getClave(),
+					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
+			t.byteToFile(bytes, rutaFirma);
+
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON, rutaFirma), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<RespuestaProceso>(
-					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), e.getMessage()), HttpStatus.BAD_REQUEST);
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR "+ e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 
 	}
@@ -175,11 +215,22 @@ public class CotroladorGeneral {
 		try {
 
 			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
-
+			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
-			calendar.add(Calendar.YEAR, 1); // numero de horas a añadir, o restar en caso de horas<0
+			calendar.add(Calendar.YEAR,
+					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
+																												// de
+																												// horas
+																												// a
+																												// añadir,
+																												// o
+																												// restar
+																												// en
+																												// caso
+																												// de
+																												// horas<0
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
@@ -209,7 +260,7 @@ public class CotroladorGeneral {
 			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610522("Certificado de Representante Legal"); // texto quemado
-			ce.set_1361415610531(solicitud.getSolRuc());// cedula del cliente
+			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
@@ -257,6 +308,28 @@ public class CotroladorGeneral {
 			String JSON = gson.toJson(certificate);
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
+//			solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
+			
+			
+
+			/* Generar firma .p12 */
+			Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
+			String rutaFirma = parametrizar.getParBase() + File.separator;
+			Date date = new Date();
+			long timeMilli = date.getTime();
+			 File baseDir = new File(rutaFirma);
+	            if (!baseDir.exists()) {
+	                baseDir.mkdirs();
+	            }
+
+			rutaFirma = rutaFirma +solicitud.getSolNombre() + "_" + solicitud.getSolApellido1()+"_"+ timeMilli + ".p12";
+
+			ToP12 t = new ToP12();
+			/* si los certificados se caducan se debe cambiar en la clase Info */
+			byte bytes[] = t.convertPEMToPKCS12FromString(gcsr.getPEMPrivateKey(), certificate.getCertificate(),
+					Info.rootCrt, Info.intermediateCrt, valor.getClave(),
+					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
+			t.byteToFile(bytes, rutaFirma);
 			repository.save(solicitud);
 			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
 //			
@@ -264,7 +337,7 @@ public class CotroladorGeneral {
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<RespuestaProceso>(
-					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), e.getMessage()), HttpStatus.BAD_REQUEST);
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR "+ e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -275,11 +348,22 @@ public class CotroladorGeneral {
 		try {
 
 			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
-
+			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
-			calendar.add(Calendar.YEAR, 1); // numero de horas a añadir, o restar en caso de horas<0
+			calendar.add(Calendar.YEAR,
+					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
+																												// de
+																												// horas
+																												// a
+																												// añadir,
+																												// o
+																												// restar
+																												// en
+																												// caso
+																												// de
+																												// horas<0
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
@@ -347,6 +431,25 @@ public class CotroladorGeneral {
 			String JSON = gson.toJson(certificate);
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
+//			solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
+			/* Generar firma .p12 */
+			Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
+			String rutaFirma = parametrizar.getParBase() + File.separator;
+			Date date = new Date();
+			long timeMilli = date.getTime();
+			 File baseDir = new File(rutaFirma);
+	            if (!baseDir.exists()) {
+	                baseDir.mkdirs();
+	            }
+
+			rutaFirma = rutaFirma +solicitud.getSolNombre() + "_" + solicitud.getSolApellido1()+"_"+ timeMilli + ".p12";
+
+			ToP12 t = new ToP12();
+			/* si los certificados se caducan se debe cambiar en la clase Info */
+			byte bytes[] = t.convertPEMToPKCS12FromString(gcsr.getPEMPrivateKey(), certificate.getCertificate(),
+					Info.rootCrt, Info.intermediateCrt, valor.getClave(),
+					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
+			t.byteToFile(bytes, rutaFirma);
 			repository.save(solicitud);
 			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
 //			
@@ -354,7 +457,7 @@ public class CotroladorGeneral {
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<RespuestaProceso>(
-					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), e.getMessage()), HttpStatus.BAD_REQUEST);
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR "+ e.getMessage()), HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -487,7 +590,7 @@ public class CotroladorGeneral {
 //		GeneradorCertificados.crearClave();
 //		return new ResponseEntity<String>("Correcto", HttpStatus.BAD_REQUEST);
 //	}
-//	@RequestMapping(value = "/generar-csr", method = RequestMethod.GET)
+	@RequestMapping(value = "/generar-csr", method = RequestMethod.GET)
 	@ApiOperation(tags = "Certificado", value = "Generar certificado")
 	public ResponseEntity<?> productos() throws Exception {
 		String keyPublic = "";
@@ -517,8 +620,10 @@ public class CotroladorGeneral {
 			// la
 			// data
 
-			System.out.println("PRIVATE KEY");
+			System.out.println("PRIVATE KEY PEM");
 			System.out.println(gcsr.getPEMPrivateKey());
+			System.out.println("PRIVATE KEY STRING");
+			System.out.println(gcsr.getPrivateKey().toString());
 
 			System.out.println("PUBLIC KEY");
 			System.out.println(gcsr.getPublicKey());
