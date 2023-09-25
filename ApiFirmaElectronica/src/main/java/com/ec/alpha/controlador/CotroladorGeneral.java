@@ -81,7 +81,7 @@ public class CotroladorGeneral {
 
 		try {
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf( valor.getIdSolicitud()), Integer.valueOf(valor.getIdUsuario()));
 
 			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
@@ -214,7 +214,7 @@ public class CotroladorGeneral {
 
 		try {
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf( valor.getIdSolicitud()), Integer.valueOf(valor.getIdUsuario()));
 			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
@@ -331,7 +331,7 @@ public class CotroladorGeneral {
 					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
 			t.byteToFile(bytes, rutaFirma);
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON,rutaFirma), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
@@ -347,7 +347,7 @@ public class CotroladorGeneral {
 
 		try {
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(valor.getIdSolicitud(), valor.getIdUsuario());
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf( valor.getIdSolicitud()), Integer.valueOf(valor.getIdUsuario()));
 			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
@@ -450,8 +450,9 @@ public class CotroladorGeneral {
 					Info.rootCrt, Info.intermediateCrt, valor.getClave(),
 					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
 			t.byteToFile(bytes, rutaFirma);
+			
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON,rutaFirma), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {

@@ -3,8 +3,8 @@ package com.ec.alpha.utilidad;
 import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
 
 public class RequestApi {
-	private Integer idSolicitud;
-	private Integer idUsuario;
+	private String idSolicitud;
+	private String idUsuario;
 	private String clave;
 
 
@@ -12,25 +12,25 @@ public class RequestApi {
 		super();
 	}
 
-	public RequestApi(Integer idSolicitud, Integer idUsuario) {
+	public RequestApi(String idSolicitud, String idUsuario) {
 		super();
 		this.idSolicitud = idSolicitud;
 		this.idUsuario = idUsuario;
 	}
 
-	public Integer getIdSolicitud() {
+	public String getIdSolicitud() {
 		return idSolicitud;
 	}
 
-	public void setIdSolicitud(Integer idSolicitud) {
+	public void setIdSolicitud(String idSolicitud) {
 		this.idSolicitud = idSolicitud;
 	}
 
-	public Integer getIdUsuario() {
+	public String getIdUsuario() {
 		return idUsuario;
 	}
 
-	public void setIdUsuario(Integer idUsuario) {
+	public void setIdUsuario(String idUsuario) {
 		this.idUsuario = idUsuario;
 	}
 

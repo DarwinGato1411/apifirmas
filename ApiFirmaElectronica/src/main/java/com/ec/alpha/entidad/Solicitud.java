@@ -165,6 +165,9 @@ public class Solicitud implements Serializable {
     
     @Column(name = "sol_cedula")
     private String solCedula;
+    
+    @Column(name = "sol_id_certificado")
+    private String solIdCertificado;
 //    
 //    @Column(name = "sol_private_key")
 //    private String solPrivateKey;
@@ -684,6 +687,14 @@ public class Solicitud implements Serializable {
 
 	public void setSolCedula(String solCedula) {
 		this.solCedula = solCedula;
+	}
+
+	public String getSolIdCertificado() {
+		return solIdCertificado;
+	}
+
+	public void setSolIdCertificado(String solIdCertificado) {
+		this.solIdCertificado = solIdCertificado;
 	}
 
 //	public String getSolPrivateKey() {
