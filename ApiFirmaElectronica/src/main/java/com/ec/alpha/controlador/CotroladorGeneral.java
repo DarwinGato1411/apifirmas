@@ -81,7 +81,8 @@ public class CotroladorGeneral {
 
 		try {
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf( valor.getIdSolicitud()), Integer.valueOf(valor.getIdUsuario()));
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf(valor.getIdSolicitud()),
+					Integer.valueOf(valor.getIdUsuario()));
 
 			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
@@ -89,7 +90,6 @@ public class CotroladorGeneral {
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
 			calendar.add(Calendar.YEAR,
 					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
-																												
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
@@ -102,7 +102,16 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre de la empresa puede ir vacio para persona natural
+			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
+																													// de
+																													// la
+																													// empresa
+																													// puede
+																													// ir
+																													// vacio
+																													// para
+																													// persona
+																													// natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensions ce = new CustomExtensions();
@@ -118,19 +127,18 @@ public class CotroladorGeneral {
 			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
 			ce.set_1361415610539(solicitud.getSolCiudad());// Ciudad de cliente
-			
+
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
 
-			//Cambio OID
-			
+			// Cambio OID
+
 			ce.set_13614156105310(solicitud.getSolRazonSocial());// Nombre de la empresa
 			ce.set_13614156105312("Ecuador");// Pais de emision
 			ce.set_13614156105311(solicitud.getSolRuc());// RUC
 			ce.set_1361415610535(solicitud.getSolCargoSolicitante());
-			
-			
+
 //se genera  a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
 
@@ -156,7 +164,8 @@ public class CotroladorGeneral {
 
 			CertificateObtenido certificate = consumirApiFirma.certificate(empresa, token.getAccess_token());
 			solicitud.setCertificate(certificate.getCertificate());
-
+			/* CAMPO PARA REVOCAR LA FIRMA */
+			solicitud.setSolRevocar(certificate.getRevocar());
 			Gson gson = new Gson();
 			String JSON = gson.toJson(certificate);
 			System.out.println("JSON ENVIO " + JSON);
@@ -168,12 +177,13 @@ public class CotroladorGeneral {
 			String rutaFirma = parametrizar.getParBase() + File.separator;
 			Date date = new Date();
 			long timeMilli = date.getTime();
-			 File baseDir = new File(rutaFirma);
-	            if (!baseDir.exists()) {
-	                baseDir.mkdirs();
-	            }
+			File baseDir = new File(rutaFirma);
+			if (!baseDir.exists()) {
+				baseDir.mkdirs();
+			}
 
-			rutaFirma = rutaFirma +solicitud.getSolNombre() + "_" + solicitud.getSolApellido1()+"_"+ timeMilli + ".p12";
+			rutaFirma = rutaFirma + solicitud.getSolNombre() + "_" + solicitud.getSolApellido1() + "_" + timeMilli
+					+ ".p12";
 
 			ToP12 t = new ToP12();
 			/* si los certificados se caducan se debe cambiar en la clase Info */
@@ -189,7 +199,8 @@ public class CotroladorGeneral {
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<RespuestaProceso>(
-					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR "+ e.getMessage()), HttpStatus.BAD_REQUEST);
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR " + e.getMessage()),
+					HttpStatus.BAD_REQUEST);
 		}
 
 	}
@@ -200,13 +211,23 @@ public class CotroladorGeneral {
 
 		try {
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf( valor.getIdSolicitud()), Integer.valueOf(valor.getIdUsuario()));
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf(valor.getIdSolicitud()),
+					Integer.valueOf(valor.getIdUsuario()));
 			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
 			calendar.add(Calendar.YEAR,
-					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero de horas aañadir, o restar en caso de horas<0
+					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
+																												// de
+																												// horas
+																												// aañadir,
+																												// o
+																												// restar
+																												// en
+																												// caso
+																												// de
+																												// horas<0
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
@@ -219,7 +240,16 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre de laempresa o puede ir vacio para persona natural
+			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
+																													// de
+																													// laempresa
+																													// o
+																													// puede
+																													// ir
+																													// vacio
+																													// para
+																													// persona
+																													// natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensionsJuridica ce = new CustomExtensionsJuridica();
@@ -230,25 +260,24 @@ public class CotroladorGeneral {
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
-			
+
 			ce.set_1361415610536("Reservado");// texto quemado
 			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
 			ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
-			
+
 			ce.set_13614156105312(solicitud.getSolCargoRepresentante());// Cargo
 			ce.set_13614156105313(solicitud.getSolRucEmpresa());// RUC
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
 
-			//Cambio OID
+			// Cambio OID
 			ce.set_1361415610535(solicitud.getSolCargoSolicitante());
 			ce.set_13614156105310(solicitud.getSolRazonSocial());// Nombre de la empresa
 			ce.set_13614156105311(solicitud.getSolRuc());// RUC
 			ce.set_13614156105312("Ecuador");// Pais de emision
-			
-			
+
 //se genera  a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
 
@@ -276,25 +305,26 @@ public class CotroladorGeneral {
 			CertificateObtenido certificate = consumirApiFirma.certificateJuridica(juridica, token.getAccess_token());
 			solicitud.setCertificate(certificate.getCertificate());
 
+			/* CAMPO PARA REVOCAR LA FIRMA */
+			solicitud.setSolRevocar(certificate.getRevocar());
 			Gson gson = new Gson();
 			String JSON = gson.toJson(certificate);
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
 //			solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
-			
-			
 
 			/* Generar firma .p12 */
 			Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
 			String rutaFirma = parametrizar.getParBase() + File.separator;
 			Date date = new Date();
 			long timeMilli = date.getTime();
-			 File baseDir = new File(rutaFirma);
-	            if (!baseDir.exists()) {
-	                baseDir.mkdirs();
-	            }
+			File baseDir = new File(rutaFirma);
+			if (!baseDir.exists()) {
+				baseDir.mkdirs();
+			}
 
-			rutaFirma = rutaFirma +solicitud.getSolNombre() + "_" + solicitud.getSolApellido1()+"_"+ timeMilli + ".p12";
+			rutaFirma = rutaFirma + solicitud.getSolNombre() + "_" + solicitud.getSolApellido1() + "_" + timeMilli
+					+ ".p12";
 
 			ToP12 t = new ToP12();
 			/* si los certificados se caducan se debe cambiar en la clase Info */
@@ -303,13 +333,14 @@ public class CotroladorGeneral {
 					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
 			t.byteToFile(bytes, rutaFirma);
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON,rutaFirma), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON, rutaFirma), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<RespuestaProceso>(
-					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR "+ e.getMessage()), HttpStatus.BAD_REQUEST);
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR " + e.getMessage()),
+					HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -319,7 +350,8 @@ public class CotroladorGeneral {
 
 		try {
 
-			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf( valor.getIdSolicitud()), Integer.valueOf(valor.getIdUsuario()));
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf(valor.getIdSolicitud()),
+					Integer.valueOf(valor.getIdUsuario()));
 			String vigencia = solicitud.getIdDetalleTipoFirma().getDetDescripcion();
 			Date fechaActual = new Date();
 			Calendar calendar = Calendar.getInstance();
@@ -355,7 +387,7 @@ public class CotroladorGeneral {
 			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610524("Certificado de Persona Natural"); // texto quemado
-			
+
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
@@ -368,11 +400,11 @@ public class CotroladorGeneral {
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
-			
-			//cambio OID
+
+			// cambio OID
 			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
 			ce.set_13614156105311(solicitud.getSolConRuc() ? solicitud.getSolRuc() : "");
-			ce.set_13614156105312("Ecuador");																			// natural con ruc
+			ce.set_13614156105312("Ecuador"); // natural con ruc
 
 			// se genera a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
@@ -406,18 +438,22 @@ public class CotroladorGeneral {
 			String JSON = gson.toJson(certificate);
 			System.out.println("JSON ENVIO " + JSON);
 			solicitud.setCertificateJson(JSON);
+
+			/* CAMPO PARA REVOCAR LA FIRMA */
+			solicitud.setSolRevocar(certificate.getRevocar());
 //			solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
 			/* Generar firma .p12 */
 			Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
 			String rutaFirma = parametrizar.getParBase() + File.separator;
 			Date date = new Date();
 			long timeMilli = date.getTime();
-			 File baseDir = new File(rutaFirma);
-	            if (!baseDir.exists()) {
-	                baseDir.mkdirs();
-	            }
+			File baseDir = new File(rutaFirma);
+			if (!baseDir.exists()) {
+				baseDir.mkdirs();
+			}
 
-			rutaFirma = rutaFirma +solicitud.getSolNombre() + "_" + solicitud.getSolApellido1()+"_"+ timeMilli + ".p12";
+			rutaFirma = rutaFirma + solicitud.getSolNombre() + "_" + solicitud.getSolApellido1() + "_" + timeMilli
+					+ ".p12";
 
 			ToP12 t = new ToP12();
 			/* si los certificados se caducan se debe cambiar en la clase Info */
@@ -425,15 +461,16 @@ public class CotroladorGeneral {
 					Info.rootCrt, Info.intermediateCrt, valor.getClave(),
 					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
 			t.byteToFile(bytes, rutaFirma);
-			
+
 			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON,rutaFirma), HttpStatus.OK);
+			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON, rutaFirma), HttpStatus.OK);
 //			
 
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<RespuestaProceso>(
-					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR "+ e.getMessage()), HttpStatus.BAD_REQUEST);
+					new RespuestaProceso(HttpStatus.BAD_REQUEST.toString(), "ERROR " + e.getMessage()),
+					HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -610,6 +647,33 @@ public class CotroladorGeneral {
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>("ERROR AL GENERARA EL CERTIFICADO: " + e.getMessage(),
+					HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	@RequestMapping(value = "/revocar-firma", method = RequestMethod.POST)
+	@ApiOperation(tags = "Global Sing", value = "Revocar firma ")
+	public ResponseEntity<?> revocarFirma(@RequestBody RequestApi valor) {
+
+		try {
+			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf(valor.getIdSolicitud()),
+					Integer.valueOf(valor.getIdUsuario()));
+			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
+			CredencialesToken param = new CredencialesToken();
+			param.setApi_key("689652829f001d7d");
+			param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+			// Obtiene el token
+			TokenFirma token = consumirApiFirma.obtenerToken(param);
+			String certificate = consumirApiFirma.revocarCertificado(solicitud.getSolRevocar(),
+					token.getAccess_token());
+			if (certificate.isEmpty()) {
+				certificate = "Firma revocada correctamente";
+			}
+			return new ResponseEntity<String>(certificate, HttpStatus.OK);
+		} catch (Exception e) {
+			// TODO: handle exception
+			return new ResponseEntity<String>("ERROR EN EL SERVCIO PARA REVOCAR LA FIRMA: " + e.getMessage(),
 					HttpStatus.BAD_REQUEST);
 		}
 
