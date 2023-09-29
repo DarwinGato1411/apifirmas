@@ -89,16 +89,7 @@ public class CotroladorGeneral {
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
 			calendar.add(Calendar.YEAR,
 					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
-																												// de
-																												// horas
-																												// a
-																												// añadir,
-																												// o
-																												// restar
-																												// en
-																												// caso
-																												// de
-																												// horas<0
+																												
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();

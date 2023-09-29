@@ -1,5 +1,7 @@
 package com.ec.alpha.controlador.services;
 
+import java.time.Instant;
+
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import com.ec.alpha.requestfirma.CredencialesToken;
 import com.ec.alpha.requestfirma.RequestJuridica;
 import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
 import com.ec.alpha.requestfirma.RequestPersonaNatural;
+import com.ec.alpha.requestfirma.RequestRevocar;
 import com.ec.alpha.responsefirma.CertificateObtenido;
 import com.ec.alpha.responsefirma.TokenFirma;
 import com.ec.alpha.validationpolicy.Validationpolicy;
@@ -72,17 +75,19 @@ public class ConsumirApiFirma {
 			System.out.println("URL  certificates" + urlPeticion);
 			// Send request with POST method.
 //			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
-			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody, String.class);
+			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody,
+					String.class);
 			String resultString = response.getBody();
 			HttpHeaders headersRespo = response.getHeaders();
-			String valor=headersRespo.getFirst("Location");
-		
+			String valor = headersRespo.getFirst("Location");
+
 			urlPeticion = urlconsulta + valor;
-			
-			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET, requestBody, CertificateObtenido.class,
-					1);
-			
-			CertificateObtenido certificate=responseCertificate.getBody();
+
+			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET,
+					requestBody, CertificateObtenido.class, 1);
+
+			CertificateObtenido certificate = responseCertificate.getBody();
+			certificate.setRevocar(valor);
 			return certificate;
 		} catch (Exception e) {
 			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
@@ -90,7 +95,6 @@ public class ConsumirApiFirma {
 		}
 	}
 
-	
 	/* CERTIFICATE JURIDICA */
 	public CertificateObtenido certificateJuridica(RequestJuridica param, String token) {
 		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
@@ -109,25 +113,26 @@ public class ConsumirApiFirma {
 			System.out.println("URL  certificates" + urlPeticion);
 			// Send request with POST method.
 //			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
-			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody, String.class);
+			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody,
+					String.class);
 			String resultString = response.getBody();
 			HttpHeaders headersRespo = response.getHeaders();
-			String valor=headersRespo.getFirst("Location");
-		
+			String valor = headersRespo.getFirst("Location");
+
 			urlPeticion = urlconsulta + valor;
-			
-			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET, requestBody, CertificateObtenido.class,
-					1);
-			
-			CertificateObtenido certificate=responseCertificate.getBody();
+
+			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET,
+					requestBody, CertificateObtenido.class, 1);
+
+			CertificateObtenido certificate = responseCertificate.getBody();
+			certificate.setRevocar(valor);
 			return certificate;
 		} catch (Exception e) {
 			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
 			return null;
 		}
 	}
-	
-	
+
 	/* CERTIFICATE PERSONA NATURAL */
 	public CertificateObtenido certificatePersonaNatural(RequestPersonaNatural param, String token) {
 		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
@@ -146,24 +151,26 @@ public class ConsumirApiFirma {
 			System.out.println("URL  certificates" + urlPeticion);
 			// Send request with POST method.
 //			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
-			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody, String.class);
+			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.POST, requestBody,
+					String.class);
 			String resultString = response.getBody();
 			HttpHeaders headersRespo = response.getHeaders();
-			String valor=headersRespo.getFirst("Location");
-		
+			String valor = headersRespo.getFirst("Location");
+
 			urlPeticion = urlconsulta + valor;
-			
-			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET, requestBody, CertificateObtenido.class,
-					1);
-			
-			CertificateObtenido certificate=responseCertificate.getBody();
+
+			ResponseEntity<CertificateObtenido> responseCertificate = restTemplate.exchange(urlPeticion, HttpMethod.GET,
+					requestBody, CertificateObtenido.class, 1);
+
+			CertificateObtenido certificate = responseCertificate.getBody();
+			certificate.setRevocar(valor);
 			return certificate;
 		} catch (Exception e) {
 			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
 			return null;
 		}
 	}
-	
+
 	/* validationpolicy */
 	public Validationpolicy validationpolicy(String token) {
 		HttpHeaders headers = new HttpHeaders();
@@ -177,18 +184,15 @@ public class ConsumirApiFirma {
 			System.out.println("URL validationpolicy " + urlPeticion);
 			// Send request with POST method.
 //			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
-			ResponseEntity<Validationpolicy> response = restTemplate.exchange(urlPeticion, HttpMethod.GET, request, Validationpolicy.class,
-					1);
-			
+			ResponseEntity<Validationpolicy> response = restTemplate.exchange(urlPeticion, HttpMethod.GET, request,
+					Validationpolicy.class, 1);
+
 			return response.getBody();
 		} catch (Exception e) {
 			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
 			return null;
 		}
 	}
-
-	
-	
 
 	/* validationpolicy */
 	public String claimsDomains(String token) {
@@ -205,11 +209,47 @@ public class ConsumirApiFirma {
 //			ResponseEntity <String> response = restTemplate.exchange(urlconsulta, HttpMethod.POST, requestBody, String.class);
 			ResponseEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.GET, request, String.class,
 					1);
-			
+
 			return response.getBody();
 		} catch (Exception e) {
 			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
 			return null;
 		}
 	}
+
+	/* REVOCAR CERTIFICADO */
+
+	/* CERTIFICATE PERSONA NATURAL */
+	public String revocarCertificado(String location,String token) {
+		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory(
+				HttpClientBuilder.create().build());
+//		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory);
+		HttpHeaders headers = new HttpHeaders();
+//		ResponseEnvioCorreo respuesta = new ResponseEnvioCorreo();
+
+		headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+		headers.set("Authorization", "Bearer " + token.replace("\"", ""));
+		try {
+			String urlPeticion = "";
+
+			RequestRevocar param = new RequestRevocar();
+			long before = Instant.now().getEpochSecond();
+			param.setRevocation_reason("keyCompromise");
+			param.setRevocation_time(before);
+			HttpEntity<RequestRevocar> requestBody = new HttpEntity<RequestRevocar>(param, headers);
+
+			System.out.println("URL  certificates" + urlPeticion);
+			urlPeticion = urlconsulta + location;
+			HttpEntity<String> response = restTemplate.exchange(urlPeticion, HttpMethod.PATCH, requestBody,
+					String.class);
+
+			String resultString = response.getBody();
+
+			return resultString;
+		} catch (Exception e) {
+			System.out.println("ERROR AL CONSULTAR " + e.getMessage());
+			return null;
+		}
+	}
+
 }

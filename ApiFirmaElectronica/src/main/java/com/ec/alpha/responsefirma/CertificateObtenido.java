@@ -4,6 +4,7 @@ public class CertificateObtenido {
     public String certificate;
     public String status;
     public int updated_at;
+    private String revocar;
 	public String getCertificate() {
 		return certificate;
 	}
@@ -21,6 +22,12 @@ public class CertificateObtenido {
 	}
 	public void setUpdated_at(int updated_at) {
 		this.updated_at = updated_at;
+	}
+	public String getRevocar() {
+		return revocar;
+	}
+	public void setRevocar(String revocar) {
+		this.revocar = revocar;
 	}
     
     
