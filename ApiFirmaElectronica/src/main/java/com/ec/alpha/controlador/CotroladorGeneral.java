@@ -111,17 +111,7 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
-																													// de
-																													// la
-																													// empresa
-																													// o
-																													// puede
-																													// ir
-																													// vacio
-																													// para
-																													// persona
-																													// natural
+			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre de la empresa puede ir vacio para persona natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensions ce = new CustomExtensions();
@@ -132,19 +122,24 @@ public class CotroladorGeneral {
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
-			ce.set_1361415610535("Reservado");// texto quemado
+			// texto quemado
 			ce.set_1361415610536("Reservado");// texto quemado
 			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
 			ce.set_1361415610539(solicitud.getSolCiudad());// Ciudad de cliente
-			ce.set_13614156105310("Ecuador");// Pais de emision
-			ce.set_13614156105311(solicitud.getSolRazonSocial());// Nombre de la empresa
-			ce.set_13614156105312(solicitud.getSolCargoSolicitante());// Cargo
-			ce.set_13614156105313(solicitud.getSolRuc());// RUC
+			
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
 
+			//Cambio OID
+			
+			ce.set_13614156105310(solicitud.getSolRazonSocial());// Nombre de la empresa
+			ce.set_13614156105312("Ecuador");// Pais de emision
+			ce.set_13614156105311(solicitud.getSolRuc());// RUC
+			ce.set_1361415610535(solicitud.getSolCargoSolicitante());
+			
+			
 //se genera  a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
 
@@ -220,17 +215,7 @@ public class CotroladorGeneral {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
 			calendar.add(Calendar.YEAR,
-					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
-																												// de
-																												// horas
-																												// a
-																												// añadir,
-																												// o
-																												// restar
-																												// en
-																												// caso
-																												// de
-																												// horas<0
+					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero de horas aañadir, o restar en caso de horas<0
 
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
@@ -243,17 +228,7 @@ public class CotroladorGeneral {
 			SubjectDn dn = new SubjectDn();
 			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
 			dn.setCountry("EC"); // Pais
-			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
-																													// de
-																													// la
-																													// empresa
-																													// o
-																													// puede
-																													// ir
-																													// vacio
-																													// para
-																													// persona
-																													// natural
+			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre de laempresa o puede ir vacio para persona natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 
 			CustomExtensionsJuridica ce = new CustomExtensionsJuridica();
@@ -264,19 +239,25 @@ public class CotroladorGeneral {
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
-			ce.set_1361415610535("Reservado");// texto quemado
+			
 			ce.set_1361415610536("Reservado");// texto quemado
 			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
 			ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
-			ce.set_13614156105310("Ecuador");// Pais de emision
-			ce.set_13614156105311(solicitud.getSolRazonSocial());// Nombre de la empresa
+			
 			ce.set_13614156105312(solicitud.getSolCargoRepresentante());// Cargo
 			ce.set_13614156105313(solicitud.getSolRucEmpresa());// RUC
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
 
+			//Cambio OID
+			ce.set_1361415610535(solicitud.getSolCargoSolicitante());
+			ce.set_13614156105310(solicitud.getSolRazonSocial());// Nombre de la empresa
+			ce.set_13614156105311(solicitud.getSolRuc());// RUC
+			ce.set_13614156105312("Ecuador");// Pais de emision
+			
+			
 //se genera  a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
 
@@ -383,7 +364,7 @@ public class CotroladorGeneral {
 			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
 			ce.set_1361415610521(solicitud.getSolMail()); // correo
 			ce.set_1361415610524("Certificado de Persona Natural"); // texto quemado
-			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
+			
 			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
 			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
 			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
@@ -393,11 +374,14 @@ public class CotroladorGeneral {
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
 			ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
 			ce.set_13614156105310("Ecuador");// Pais de emision
-			ce.set_13614156105313(solicitud.getSolConRuc() ? solicitud.getSolRuc() : "");// RUC en el caso de persona
-																							// natural con ruc
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
 							: "TOKEN");// texto quemado
+			
+			//cambio OID
+			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
+			ce.set_13614156105311(solicitud.getSolConRuc() ? solicitud.getSolRuc() : "");
+			ce.set_13614156105312("Ecuador");																			// natural con ruc
 
 			// se genera a la base de datos por parte de alpha
 			GenerateCSR gcsr = GenerateCSR.getInstance();
