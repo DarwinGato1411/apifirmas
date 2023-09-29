@@ -25,42 +25,53 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-public class RestTemplateConfig {	
-
+public class RestTemplateConfig {
 
 	@Value("${trust.store}")
 	private Resource trustStore;
 	@Value("${trust.store.password}")
 	private String trustStorePassword;
 	String protocol = "TLSv1.2";
+	@Value("${ambiente.produccion}")
+	private Boolean produccion;
 
 	@Bean
 	RestTemplate restTemplate() throws Exception {
 		SSLContext sslContext;
-		RestTemplate restTemplate=null;
+		RestTemplate restTemplate = null;
 		try {
-			   sslContext = SSLContextBuilder
-		                .create()
-//		                .loadKeyMaterial(ResourceUtils.getFile("classpath:alpha.p12"), trustStorePassword.toCharArray(), trustStorePassword.toCharArray())
-//		                .loadTrustMaterial(ResourceUtils.getFile("classpath:alpha.jks"), trustStorePassword.toCharArray(), new TrustSelfSignedStrategy() {
-		                	 .loadKeyMaterial(ResourceUtils.getFile("/opt/alpha.p12"), trustStorePassword.toCharArray(), trustStorePassword.toCharArray())
-				                .loadTrustMaterial(ResourceUtils.getFile("/opt/alpha.jks"), trustStorePassword.toCharArray(), new TrustSelfSignedStrategy() {
-		                    @Override
-		                    public boolean isTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
-		                        return true;
-		                    }
-		                })
-		                .build();
-			
-			CloseableHttpClient client = HttpClients.custom()
-			        .setSSLContext(sslContext)
-			        .build();
-			HttpComponentsClientHttpRequestFactory requestFactory
-			        = new HttpComponentsClientHttpRequestFactory();
+
+			String keyMaterial = "";
+			String trustMaterial = "";
+
+			if (produccion) {
+				keyMaterial = "/opt/alpha.p12";
+				trustMaterial = "/opt/alpha.jks";
+
+			} else {
+				keyMaterial = "classpath:alpha.p12";
+				trustMaterial = "classpath:alpha.jks";
+			}
+			sslContext = SSLContextBuilder.create()
+					.loadKeyMaterial(ResourceUtils.getFile(keyMaterial), trustStorePassword.toCharArray(),
+							trustStorePassword.toCharArray())
+					.loadTrustMaterial(ResourceUtils.getFile(trustMaterial), trustStorePassword.toCharArray(),
+							new TrustSelfSignedStrategy() {
+//		                	 .loadKeyMaterial(ResourceUtils.getFile("/opt/alpha.p12"), trustStorePassword.toCharArray(), trustStorePassword.toCharArray())
+//				                .loadTrustMaterial(ResourceUtils.getFile("/opt/alpha.jks"), trustStorePassword.toCharArray(), new TrustSelfSignedStrategy() {
+								@Override
+								public boolean isTrusted(java.security.cert.X509Certificate[] chain, String authType)
+										throws java.security.cert.CertificateException {
+									return true;
+								}
+							})
+					.build();
+
+			CloseableHttpClient client = HttpClients.custom().setSSLContext(sslContext).build();
+			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
 			requestFactory.setHttpClient(client);
-			 restTemplate = new RestTemplate(requestFactory);
-			
-			
+			restTemplate = new RestTemplate(requestFactory);
+
 		} catch (KeyManagementException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -83,7 +94,7 @@ public class RestTemplateConfig {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return restTemplate;
 	}
 }

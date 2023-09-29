@@ -47,6 +47,7 @@ import com.ec.alpha.utilidad.GeneradorCertificados;
 import com.ec.alpha.utilidad.GenerateCSR;
 import com.ec.alpha.utilidad.Info;
 import com.ec.alpha.utilidad.RequestApi;
+import com.ec.alpha.utilidad.RequestRevocarApi;
 import com.ec.alpha.utilidad.RespuestaProceso;
 import com.ec.alpha.utilidad.ToP12;
 import com.ec.alpha.validationpolicy.Validationpolicy;
@@ -654,11 +655,16 @@ public class CotroladorGeneral {
 
 	@RequestMapping(value = "/revocar-firma", method = RequestMethod.POST)
 	@ApiOperation(tags = "Global Sing", value = "Revocar firma ")
-	public ResponseEntity<?> revocarFirma(@RequestBody RequestApi valor) {
+	public ResponseEntity<?> revocarFirma(@RequestBody RequestRevocarApi valor) {
 
 		try {
 			Solicitud solicitud = repository.buscarPorIdSolicitud(Integer.valueOf(valor.getIdSolicitud()),
 					Integer.valueOf(valor.getIdUsuario()));
+
+			if (solicitud.getSolRevocar().isEmpty()) {
+				return new ResponseEntity<String>("LA FIRMA FUE CREADA ANTES DE IMPLEMENTAR LA REVOCACION",
+						HttpStatus.BAD_REQUEST);
+			}
 			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
 			CredencialesToken param = new CredencialesToken();
 			param.setApi_key("689652829f001d7d");

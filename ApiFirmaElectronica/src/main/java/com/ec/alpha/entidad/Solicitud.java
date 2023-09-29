@@ -702,7 +702,7 @@ public class Solicitud implements Serializable {
 	}
 
 	public String getSolRevocar() {
-		return solRevocar;
+		return solRevocar==null?"":solRevocar;
 	}
 
 	public void setSolRevocar(String solRevocar) {
