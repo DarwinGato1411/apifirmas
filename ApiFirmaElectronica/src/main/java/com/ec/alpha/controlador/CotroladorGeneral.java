@@ -662,7 +662,7 @@ public class CotroladorGeneral {
 					Integer.valueOf(valor.getIdUsuario()));
 
 			if (solicitud.getSolRevocar().isEmpty()) {
-				return new ResponseEntity<String>("LA FIRMA FUE CREADA ANTES DE IMPLEMENTAR LA REVOCACION",
+				return new ResponseEntity<String>("Ocurrio un ERROR La firma fue implementada antes de crear la revocacion",
 						HttpStatus.BAD_REQUEST);
 			}
 			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
@@ -679,7 +679,7 @@ public class CotroladorGeneral {
 			return new ResponseEntity<String>(certificate, HttpStatus.OK);
 		} catch (Exception e) {
 			// TODO: handle exception
-			return new ResponseEntity<String>("ERROR EN EL SERVCIO PARA REVOCAR LA FIRMA: " + e.getMessage(),
+			return new ResponseEntity<String>("ERROR en el servicio de revocar: " + e.getMessage(),
 					HttpStatus.BAD_REQUEST);
 		}
 
