@@ -35,9 +35,11 @@ import com.ec.alpha.requestfirma.CredencialesToken;
 import com.ec.alpha.requestfirma.CustomExtensions;
 import com.ec.alpha.requestfirma.CustomExtensionsJuridica;
 import com.ec.alpha.requestfirma.CustomExtensionsPersona;
+import com.ec.alpha.requestfirma.CustomExtensionsPersona2;
 import com.ec.alpha.requestfirma.RequestJuridica;
 import com.ec.alpha.requestfirma.RequestMiembroEmpresa;
 import com.ec.alpha.requestfirma.RequestPersonaNatural;
+import com.ec.alpha.requestfirma.RequestPersonaNatural2;
 import com.ec.alpha.requestfirma.SubjectDn;
 import com.ec.alpha.requestfirma.Validity;
 import com.ec.alpha.responsefirma.CertificateObtenido;
@@ -101,7 +103,9 @@ public class CotroladorGeneral {
 			validity.setNot_before(before);// cantidad de años
 
 			SubjectDn dn = new SubjectDn();
-			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
+			dn.setCommon_name(((solicitud.getSolApellido2() != null
+					? (solicitud.getSolNombre() + " " + solicitud.getSolApellido1() + " " + solicitud.getSolApellido2())
+					: (solicitud.getSolNombre() + " " + solicitud.getSolApellido1())))); // nombres
 			dn.setCountry("EC"); // Pais
 			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
 																													// de
@@ -127,7 +131,7 @@ public class CotroladorGeneral {
 			ce.set_1361415610536("Reservado");// texto quemado
 			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
 			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
-			ce.set_1361415610539(solicitud.getSolCiudad());// Ciudad de cliente
+			ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
 
 			ce.set_13614156105318(
 					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
@@ -137,7 +141,7 @@ public class CotroladorGeneral {
 
 			ce.set_13614156105310(solicitud.getSolRazonSocial());// Nombre de la empresa
 			ce.set_13614156105312("Ecuador");// Pais de emision
-			ce.set_13614156105311(solicitud.getSolRuc());// RUC
+			ce.set_13614156105311(solicitud.getSolRucEmpresa());// RUC
 			ce.set_1361415610535(solicitud.getSolCargoSolicitante());
 
 //se genera  a la base de datos por parte de alpha
@@ -239,8 +243,10 @@ public class CotroladorGeneral {
 			validity.setNot_before(before);// cantidad de años
 
 			SubjectDn dn = new SubjectDn();
-			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
-			dn.setCountry("EC"); // Pais
+			dn.setCommon_name(((solicitud.getSolApellido2() != null
+					? solicitud.getSolNombre() + " " + solicitud.getSolApellido1() + " " + solicitud.getSolApellido2()
+					: solicitud.getSolNombre() + " " + solicitud.getSolApellido1()))); // correo del cliente
+//			dn.setCountry("EC"); // Pais
 			dn.setOrganization(solicitud.getSolRazonSocial() != null ? solicitud.getSolRazonSocial() : "Alpha"); // Nombre
 																													// de
 																													// laempresa
@@ -274,9 +280,10 @@ public class CotroladorGeneral {
 							: "TOKEN");// texto quemado
 
 			// Cambio OID
-			ce.set_1361415610535(solicitud.getSolCargoSolicitante());
+			ce.set_1361415610535(solicitud.getSolCargoRepresentante());
 			ce.set_13614156105310(solicitud.getSolRazonSocial());// Nombre de la empresa
-			ce.set_13614156105311(solicitud.getSolRuc());// RUC
+			ce.set_13614156105311(solicitud.getSolRucEmpresa());// RUC
+
 			ce.set_13614156105312("Ecuador");// Pais de emision
 
 //se genera  a la base de datos por parte de alpha
@@ -359,11 +366,9 @@ public class CotroladorGeneral {
 			calendar.setTime(fechaActual); // Configuramos la fecha que se recibe
 			calendar.add(Calendar.YEAR,
 					vigencia.contains("1") ? 1 : vigencia.contains("2") ? 2 : vigencia.contains("3") ? 3 : 1); // numero
-																												// de
 																												// horas
 																												// a
-																												// añadir,
-																												// o
+																												// añadir,o
 																												// restar
 																												// en
 																												// caso
@@ -373,99 +378,178 @@ public class CotroladorGeneral {
 			long before = Instant.now().getEpochSecond();
 			long after = calendar.getTime().toInstant().getEpochSecond();
 
-			RequestPersonaNatural personaNatural = new RequestPersonaNatural();
 			Validity validity = new Validity();
 			validity.setNot_after(after); // fecha actual en milisegundos
 			validity.setNot_before(before);// cantidad de años
 
 			SubjectDn dn = new SubjectDn();
-			dn.setCommon_name(solicitud.getSolMail()); // correo del cliente
+			dn.setCommon_name(((solicitud.getSolApellido2() != null
+					? (solicitud.getSolNombre() + " " + solicitud.getSolApellido1() + " " + solicitud.getSolApellido2())
+					: (solicitud.getSolNombre() + " " + solicitud.getSolApellido1())))); // correo del cliente // correo
+																							// del cliente
+
 			dn.setCountry("EC"); // Pais
 //			dn.setOrganization(solicitud.getSolRazonSocial()!=null?solicitud.getSolRazonSocial():"Alpha"); // Nombre de la empresa o puede ir vacio para persona natural
 			dn.setSerial_number(solicitud.getSolRuc()); // Cedula
 			System.out.println("solicitud.getSolCedula() " + solicitud.getSolCedula());
-			CustomExtensionsPersona ce = new CustomExtensionsPersona();
-			ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de politicas
-			ce.set_1361415610521(solicitud.getSolMail()); // correo
-			ce.set_1361415610524("Certificado de Persona Natural"); // texto quemado
 
-			ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
-			ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
-			ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
-			ce.set_1361415610535("Reservado");// texto quemado
-			ce.set_1361415610536("Reservado");// texto quemado
-			ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
-			ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
-			ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
-			ce.set_13614156105310("Ecuador");// Pais de emision
-			ce.set_13614156105318(
-					solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO") ? "PFX"
-							: "TOKEN");// texto quemado
+			if (solicitud.getSolConRuc()) {
+				CustomExtensionsPersona ce = new CustomExtensionsPersona();
+				ce.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de // //
+																										// politicas
+				ce.set_1361415610521(solicitud.getSolMail()); // correo
+				ce.set_1361415610524("Certificado de Persona Natural"); // texto quemado
+				ce.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
+				ce.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
+				ce.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
+				ce.set_1361415610535("Reservado");// texto quemado
+				ce.set_1361415610536("Reservado");// texto quemado
+				ce.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
+				ce.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
+				ce.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
+				ce.set_13614156105310("Ecuador");// Pais de emision
+				ce.set_13614156105318(
+						solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO")
+								? "PFX"
+								: "TOKEN");// texto quemado
 
-			// cambio OID
-			ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
-			ce.set_13614156105311(solicitud.getSolConRuc() ? solicitud.getSolRuc() : "");
-			ce.set_13614156105312("Ecuador"); // natural con ruc
+				// cambio OID
+				ce.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
+				ce.set_13614156105312("Ecuador");
+				ce.set_13614156105311(solicitud.getSolRuc());
+				/* LLAMADA AL */
+				RequestPersonaNatural personaNatural = new RequestPersonaNatural();
+				GenerateCSR gcsr = GenerateCSR.getInstance();
 
-			// se genera a la base de datos por parte de alpha
-			GenerateCSR gcsr = GenerateCSR.getInstance();
+				personaNatural.setPublic_key(
+						gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
+								.replaceAll("\\r", ""));
+				personaNatural.setCustom_extensions(ce);
+				personaNatural.setSubject_dn(dn);
+				personaNatural.setValidity(validity);
 
-			// System.out.println(gcsr.getCSR()); // CSR sin nada de info
-			// System.out.println(gcsr.getCSR("Pablo")); //CSR solo con el CN
-//			System.out.println(gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC").replaceAll("\\r", "")); // CSR
-			// con
+				/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
+				CredencialesToken param = new CredencialesToken();
+				param.setApi_key("689652829f001d7d");
+				param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+				// Obtiene el token
+				TokenFirma token = consumirApiFirma.obtenerToken(param);
 
-			/* LLAMADA AL */
-			personaNatural.setPublic_key(
-					gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
-							.replaceAll("\\r", ""));
+				CertificateObtenido certificate = consumirApiFirma.certificatePersonaNatural(personaNatural,
+						token.getAccess_token());
 
-			personaNatural.setCustom_extensions(ce);
-			personaNatural.setSubject_dn(dn);
-			personaNatural.setValidity(validity);
+				solicitud.setCertificate(certificate.getCertificate());
 
-			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
-			CredencialesToken param = new CredencialesToken();
-			param.setApi_key("689652829f001d7d");
-			param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
-			// Obtiene el token
-			TokenFirma token = consumirApiFirma.obtenerToken(param);
+				Gson gson = new Gson();
+				String JSON = gson.toJson(certificate);
+				System.out.println("JSON ENVIO " + JSON);
+				solicitud.setCertificateJson(JSON);
 
-			CertificateObtenido certificate = consumirApiFirma.certificatePersonaNatural(personaNatural,
-					token.getAccess_token());
-			solicitud.setCertificate(certificate.getCertificate());
+				/* CAMPO PARA REVOCAR LA FIRMA */
+				solicitud.setSolRevocar(certificate.getRevocar());
+//				solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
+				/* Generar firma .p12 */
+				Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
+				String rutaFirma = parametrizar.getParBase() + File.separator;
+				Date date = new Date();
+				long timeMilli = date.getTime();
+				File baseDir = new File(rutaFirma);
+				if (!baseDir.exists()) {
+					baseDir.mkdirs();
+				}
 
-			Gson gson = new Gson();
-			String JSON = gson.toJson(certificate);
-			System.out.println("JSON ENVIO " + JSON);
-			solicitud.setCertificateJson(JSON);
+				rutaFirma = rutaFirma + solicitud.getSolNombre() + "_" + solicitud.getSolApellido1() + "_" + timeMilli
+						+ ".p12";
 
-			/* CAMPO PARA REVOCAR LA FIRMA */
-			solicitud.setSolRevocar(certificate.getRevocar());
-//			solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
-			/* Generar firma .p12 */
-			Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
-			String rutaFirma = parametrizar.getParBase() + File.separator;
-			Date date = new Date();
-			long timeMilli = date.getTime();
-			File baseDir = new File(rutaFirma);
-			if (!baseDir.exists()) {
-				baseDir.mkdirs();
+				ToP12 t = new ToP12();
+				/* si los certificados se caducan se debe cambiar en la clase Info */
+				byte bytes[] = t.convertPEMToPKCS12FromString(gcsr.getPEMPrivateKey(), certificate.getCertificate(),
+						Info.rootCrt, Info.intermediateCrt, valor.getClave(),
+						solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
+				t.byteToFile(bytes, rutaFirma);
+
+				repository.save(solicitud);
+				return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON, rutaFirma),
+						HttpStatus.OK);
+			} else {
+				CustomExtensionsPersona2 ce2 = new CustomExtensionsPersona2();
+				ce2.set_136141561051("https://www.alphaside.com/Normativas/P_de_Certificados/dpc.pdf"); // url de // //
+				// politicas
+				ce2.set_1361415610521(solicitud.getSolMail()); // correo
+				ce2.set_1361415610524("Certificado de Persona Natural"); // texto quemado
+				ce2.set_1361415610532(solicitud.getSolNombre());// Nombre del cliente
+				ce2.set_1361415610533(solicitud.getSolApellido1());// Apellido del cliente
+				ce2.set_1361415610534(solicitud.getSolApellido2());// Segundo apellido
+				ce2.set_1361415610535("Reservado");// texto quemado
+				ce2.set_1361415610536("Reservado");// texto quemado
+				ce2.set_1361415610537(solicitud.getSolDireccionCompleta());// Direccion del cliente
+				ce2.set_1361415610538(solicitud.getSolCelular());// Celular del cliente
+				ce2.set_1361415610539(solicitud.getIdCiudad().getCiuNombre());// Ciudad de cliente
+				ce2.set_13614156105310("Ecuador");// Pais de emision
+				ce2.set_13614156105318(
+						solicitud.getIdDetalleTipoFirma().getIdTipoFirma().getTipDescripcion().contains("ARCHIVO")
+								? "PFX"
+								: "TOKEN");// texto quemado
+
+// cambio OID
+				ce2.set_1361415610531(solicitud.getSolCedula());// cedula del cliente
+				ce2.set_13614156105312("Ecuador");
+
+				/* LLAMADA AL */
+				RequestPersonaNatural2 personaNatural = new RequestPersonaNatural2();
+				GenerateCSR gcsr = GenerateCSR.getInstance();
+
+				personaNatural.setPublic_key(
+						gcsr.getCSR("Pablo", "Tecnologia", "Alpha Technologies", "Kennedy", "Pichincha", "EC")
+								.replaceAll("\\r", ""));
+				personaNatural.setCustom_extensions(ce2);
+				personaNatural.setSubject_dn(dn);
+				personaNatural.setValidity(validity);
+
+				/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
+				CredencialesToken param = new CredencialesToken();
+				param.setApi_key("689652829f001d7d");
+				param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+// Obtiene el token
+				TokenFirma token = consumirApiFirma.obtenerToken(param);
+
+				CertificateObtenido certificate = consumirApiFirma.certificatePersonaNatural2(personaNatural,
+						token.getAccess_token());
+
+				solicitud.setCertificate(certificate.getCertificate());
+
+				Gson gson = new Gson();
+				String JSON = gson.toJson(certificate);
+				System.out.println("JSON ENVIO " + JSON);
+				solicitud.setCertificateJson(JSON);
+
+				/* CAMPO PARA REVOCAR LA FIRMA */
+				solicitud.setSolRevocar(certificate.getRevocar());
+//solicitud.setSolPrivateKey(gcsr.getPEMPrivateKey());
+				/* Generar firma .p12 */
+				Parametrizar parametrizar = parametrizarRepository.buscarActivo(Boolean.TRUE);
+				String rutaFirma = parametrizar.getParBase() + File.separator;
+				Date date = new Date();
+				long timeMilli = date.getTime();
+				File baseDir = new File(rutaFirma);
+				if (!baseDir.exists()) {
+					baseDir.mkdirs();
+				}
+
+				rutaFirma = rutaFirma + solicitud.getSolNombre() + "_" + solicitud.getSolApellido1() + "_" + timeMilli
+						+ ".p12";
+
+				ToP12 t = new ToP12();
+				/* si los certificados se caducan se debe cambiar en la clase Info */
+				byte bytes[] = t.convertPEMToPKCS12FromString(gcsr.getPEMPrivateKey(), certificate.getCertificate(),
+						Info.rootCrt, Info.intermediateCrt, valor.getClave(),
+						solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
+				t.byteToFile(bytes, rutaFirma);
+
+				repository.save(solicitud);
+				return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON, rutaFirma),
+						HttpStatus.OK);
 			}
-
-			rutaFirma = rutaFirma + solicitud.getSolNombre() + "_" + solicitud.getSolApellido1() + "_" + timeMilli
-					+ ".p12";
-
-			ToP12 t = new ToP12();
-			/* si los certificados se caducan se debe cambiar en la clase Info */
-			byte bytes[] = t.convertPEMToPKCS12FromString(gcsr.getPEMPrivateKey(), certificate.getCertificate(),
-					Info.rootCrt, Info.intermediateCrt, valor.getClave(),
-					solicitud.getSolNombre() + " " + solicitud.getSolApellido1());
-			t.byteToFile(bytes, rutaFirma);
-
-			repository.save(solicitud);
-			return new ResponseEntity<>(new RespuestaProceso(HttpStatus.OK.toString(), JSON, rutaFirma), HttpStatus.OK);
-//			
 
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -560,7 +644,7 @@ public class CotroladorGeneral {
 			ce.set_13614156105310("Ecuador");// Pais de emision
 			ce.set_13614156105311("Alpha Technologies");// Nombre de la empresa
 			ce.set_13614156105312("Gerente");// Cargo
-			ce.set_13614156105313("1720489879001");// RUC
+
 			ce.set_13614156105318("PFX");// texto quemado
 
 //se genera  a la base de datos por parte de alpha
@@ -662,13 +746,29 @@ public class CotroladorGeneral {
 					Integer.valueOf(valor.getIdUsuario()));
 
 			if (solicitud.getSolRevocar().isEmpty()) {
-				return new ResponseEntity<String>("Ocurrio un ERROR La firma fue implementada antes de crear la revocacion",
+				return new ResponseEntity<String>(
+						"Ocurrio un ERROR La firma fue implementada antes de crear la revocacion",
 						HttpStatus.BAD_REQUEST);
 			}
 			/* LLAMADA AL SERVICIO WEB GENERA FIRMA */
 			CredencialesToken param = new CredencialesToken();
-			param.setApi_key("689652829f001d7d");
-			param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+
+			String tipoEmision = solicitud.getSolTipo();
+			if (tipoEmision.contains("PN")) {
+				// PERSONA NATURAL
+				param.setApi_key("689652829f001d7d");
+				param.setApi_secret("d7f286ac80dd40ac4df7db7e6e7186d5467985b6");
+			} else if (tipoEmision.contains("ME")) {
+				param.setApi_key("014b7c08cdf45861");
+				param.setApi_secret("595797bc67224af967ac6a35036ab6ae398a7cac");
+			} else if (tipoEmision.contains("RLE")) {
+				param.setApi_key("4c88475d607ea046");
+				param.setApi_secret("b73eef06c7f4512a99b12acc657416cfeda85fa6");
+			} else {
+				System.out.println("NO INGRESA");
+				return new ResponseEntity<String>("No existe el tipo de de solicitud: ", HttpStatus.BAD_REQUEST);
+			}
+
 			// Obtiene el token
 			TokenFirma token = consumirApiFirma.obtenerToken(param);
 			String certificate = consumirApiFirma.revocarCertificado(solicitud.getSolRevocar(),
