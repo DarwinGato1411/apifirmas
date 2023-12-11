@@ -773,6 +773,7 @@ public class CotroladorGeneral {
 			TokenFirma token = consumirApiFirma.obtenerToken(param);
 			String certificate = consumirApiFirma.revocarCertificado(solicitud.getSolRevocar(),
 					token.getAccess_token());
+			System.out.println(certificate);
 			if (certificate.isEmpty()) {
 				certificate = "Firma revocada correctamente";
 			}
